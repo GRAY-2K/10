@@ -215,3 +215,33 @@ body {
 .nav-btn:disabled {
   cursor: not-allowed;
 }
+
+/* Auth0 Login/Logout Buttons */
+#auth-buttons {
+  text-align: right;
+  padding: 1rem;
+}
+
+#login-button,
+#logout-button {
+  padding: 0.5rem 1rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#login-button:hover,
+#logout-button:hover {
+  background-color: var(--secondary-color);
+}
+
+#login-button {
+  display: none; /* Hidden by default, shown when user is not authenticated */
+}
+
+#logout-button {
+  display: none; /* Hidden by default, shown when user is authenticated */
+}
