@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MEDICAL EQUIPMENT DETAILS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+  </head>
+  <body>
+    <div class="header">
+      <h2>MEDICAL EQUIPMENT DETAILS</h2>
+      <div class="version"></div>
+    </div>
+    <div class="container" style="padding: 0">
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 0.25rem;
+          margin-top: 2rem;
+        "
+      >
+        <label for="fileInput" class="custom-file-upload"
+          >Upload Excel File</label
+        >
+        <input
+          type="file"
+          id="fileInput"
+          accept=".xlsx,.xls"
+          style="display: none"
+        />
+        <div id="status"></div>
+      </div>
+      <div id="searchContainer" style="display: none; margin-top: -4rem">
+        <div style="display: flex; justify-content: center">
+          <input type="text" id="searchInput" placeholder="Enter BME Number" />
+        </div>
+        <div id="formResult" style="text-align: center; margin-top: 2rem"></div>
+      </div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
