@@ -1,4 +1,3 @@
-<script>
 let auth0Client = null;
 async function initAuth0() {
     auth0Client = await createAuth0Client({
@@ -15,7 +14,6 @@ async function initAuth0() {
     }
 }
 initAuth0();
-</script>
 let workbookData = null;
 let historyData = null;
 let headers = [];
