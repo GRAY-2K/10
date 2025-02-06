@@ -1,7 +1,7 @@
 // Auth0 Configuration
 const auth0Config = {
-  domain: "dev-t73j0xka47yjehi4.us.auth0.com", // Replace with your Auth0 domain
-  clientId: "TCtcOqtPEDBHHlYRG9RYBXysifAxGRMp", // Replace with your Auth0 client ID
+  domain: "YOUR_AUTH0_DOMAIN", // Replace with your Auth0 domain
+  clientId: "YOUR_AUTH0_CLIENT_ID", // Replace with your Auth0 client ID
   authorizationParams: {
     redirect_uri: window.location.origin, // Redirect to the current page after login
   },
@@ -58,7 +58,7 @@ window.addEventListener("load", async () => {
   await checkAuth();
 });
 
-// Your Existing Code (with minor adjustments to ensure it only runs when authenticated)
+// Your Existing Code for Medical Equipment Details
 let workbookData = null;
 let historyData = null;
 let headers = [];
@@ -457,4 +457,4 @@ document
 
 // Example usage:
 // Replace 'your-file-url.xlsx' with the actual URL of your Excel file
-loadExcelFromUrl('link');
+loadExcelFromUrl('your-file-url.xlsx');
