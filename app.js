@@ -1,7 +1,7 @@
 // Auth0 Configuration
 const auth0Config = {
-  domain: "YOUR_AUTH0_DOMAIN", // Replace with your Auth0 domain
-  clientId: "YOUR_AUTH0_CLIENT_ID", // Replace with your Auth0 client ID
+  domain: "dev-t73j0xka47yjehi4.us.auth0.com", // Replace with your Auth0 domain
+  clientId: "TCtcOqtPEDBHHlYRG9RYBXysifAxGRMp", // Replace with your Auth0 client ID
   authorizationParams: {
     redirect_uri: window.location.origin, // Redirect to the current page after login
   },
