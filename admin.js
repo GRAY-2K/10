@@ -55,39 +55,42 @@ async function isAdmin(email) {
 }
 
 // Load pending users
-function loadPendingUsers() {
+async function loadPendingUsers() {
     const pendingUsersList = document.getElementById("pending-users-list");
     
-    console.log('Loading pending users...');
-    
-    db.collection('pendingUsers')
-        .orderBy('createdAt', 'desc')
-        .onSnapshot((snapshot) => {
-            console.log('Pending users snapshot:', snapshot.size);
-            pendingUsersList.innerHTML = '';
+    try {
+        console.log('Loading pending users...');
+        
+        // Use get() instead of onSnapshot
+        const snapshot = await db.collection('pendingUsers')
+            .orderBy('createdAt', 'desc')
+            .get();
             
-            if (snapshot.empty) {
-                pendingUsersList.innerHTML = '<p>No pending users</p>';
-                return;
-            }
+        console.log('Pending users snapshot:', snapshot.size);
+        pendingUsersList.innerHTML = '';
+        
+        if (snapshot.empty) {
+            pendingUsersList.innerHTML = '<p>No pending users</p>';
+            return;
+        }
 
-            snapshot.forEach((doc) => {
-                const user = doc.data();
-                console.log('Pending user:', user);
-                const userDiv = document.createElement('div');
-                userDiv.className = 'pending-user';
-                userDiv.innerHTML = `
-                    <p>Email: ${user.email}</p>
-                    <p>Requested: ${user.createdAt ? new Date(user.createdAt.toDate()).toLocaleString() : 'N/A'}</p>
-                    <button onclick="approveUser('${doc.id}', '${user.email}')">Approve</button>
-                    <button onclick="rejectUser('${doc.id}')" class="reject">Reject</button>
-                `;
-                pendingUsersList.appendChild(userDiv);
-            });
-        }, (error) => {
-            console.error('Error loading pending users:', error);
-            pendingUsersList.innerHTML = '<p>Error loading pending users</p>';
+        snapshot.forEach((doc) => {
+            const user = doc.data();
+            console.log('Pending user:', user);
+            const userDiv = document.createElement('div');
+            userDiv.className = 'pending-user';
+            userDiv.innerHTML = `
+                <p>Email: ${user.email}</p>
+                <p>Requested: ${user.createdAt ? new Date(user.createdAt.toDate()).toLocaleString() : 'N/A'}</p>
+                <button onclick="approveUser('${doc.id}', '${user.email}')">Approve</button>
+                <button onclick="rejectUser('${doc.id}')" class="reject">Reject</button>
+            `;
+            pendingUsersList.appendChild(userDiv);
         });
+    } catch (error) {
+        console.error('Error loading pending users:', error);
+        pendingUsersList.innerHTML = '<p>Error loading pending users</p>';
+    }
 }
 
 // Approve user
