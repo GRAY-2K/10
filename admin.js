@@ -192,28 +192,30 @@ function showStatus(message, type) {
     }
 }
 
-// Add this function
+// Simplified test function
 async function testFirestore() {
     try {
         console.log("=== Testing Firestore Access ===");
-        // Try to list all collections
-        const collections = await db.listCollections();
-        console.log("Collections:", collections);
         
-        // Try to read pendingUsers
-        const pendingRef = db.collection('pendingUsers');
-        const test = await pendingRef.limit(1).get();
-        console.log("Can read pendingUsers:", !test.empty);
+        // Try a simple document read
+        console.log("1. Testing direct document read...");
+        const testDoc = await db.collection('pendingUsers').doc('test123').get();
+        console.log("2. Document exists:", testDoc.exists);
+        if (testDoc.exists) {
+            console.log("3. Document data:", testDoc.data());
+        }
         
         // Log the current user
         const user = auth.currentUser;
-        console.log("Current user:", {
+        console.log("4. Current user:", {
             email: user.email,
-            uid: user.uid,
-            emailVerified: user.emailVerified
+            uid: user.uid
         });
     } catch (error) {
-        console.error("Test failed:", error);
+        console.error("Test failed:", {
+            code: error.code,
+            message: error.message
+        });
     }
 }
 
