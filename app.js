@@ -52,10 +52,9 @@ function login(email, password) {
       
       switch (error.code) {
         case 'auth/user-not-found':
-          errorMessage = "No account found with this email. Please sign up first.";
-          break;
         case 'auth/wrong-password':
-          errorMessage = "Incorrect password. Please try again.";
+        case 'auth/invalid-login-credentials':
+          errorMessage = "Invalid email or password. Please try again.";
           break;
         case 'auth/invalid-email':
           errorMessage = "Please enter a valid email address.";
@@ -67,7 +66,7 @@ function login(email, password) {
           errorMessage = "Too many failed attempts. Please try again later or reset your password.";
           break;
         default:
-          errorMessage = `Login failed: ${error.message}`;
+          errorMessage = "Login failed. Please try again.";
       }
       
       showStatus(errorMessage, "error");
