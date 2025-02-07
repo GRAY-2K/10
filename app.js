@@ -4,38 +4,149 @@ const auth = firebase.auth();
 // Check Authentication Status
 function checkAuth() {
   auth.onAuthStateChanged((user) => {
+    const loginForm = document.getElementById("login-form");
+    const logoutButton = document.getElementById("logout-button");
+    const appContent = document.getElementById("app-content");
+
+    if (!loginForm || !logoutButton || !appContent) {
+      console.error("Required DOM elements not found");
+      return;
+    }
+
     if (user) {
       // User is signed in
-      document.getElementById("login-button").style.display = "none";
-      document.getElementById("logout-button").style.display = "block";
-      document.getElementById("app-content").style.display = "block";
+      loginForm.style.display = "none";
+      logoutButton.style.display = "block";
+      appContent.style.display = "block";
+      showStatus(`Welcome ${user.email}!`, "success");
     } else {
       // User is signed out
-      document.getElementById("login-button").style.display = "block";
-      document.getElementById("logout-button").style.display = "none";
-      document.getElementById("app-content").style.display = "none";
+      loginForm.style.display = "block";
+      logoutButton.style.display = "none";
+      appContent.style.display = "none";
     }
   });
 }
 
 // Login Function
 function login() {
-  var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch((error) => {
-    console.error("Error logging in:", error);
-    showStatus("Login failed: " + error.message, "error");
-  });
+  const email = document.getElementById('email-input').value;
+  const password = document.getElementById('password-input').value;
+  
+  if (!email || !password) {
+    showStatus("Please provide both email and password", "error");
+    return;
+  }
+
+  showStatus("Logging in...", "info");
+  
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      showStatus("Successfully logged in!", "success");
+    })
+    .catch((error) => {
+      console.error("Error logging in:", error);
+      let errorMessage = "Login failed";
+      
+      switch (error.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+          errorMessage = "Invalid email or password.";
+          break;
+        case 'auth/invalid-email':
+          errorMessage = "Please enter a valid email address.";
+          break;
+        case 'auth/user-disabled':
+          errorMessage = "This account has been disabled.";
+          break;
+        default:
+          errorMessage = `Login failed: ${error.message}`;
+      }
+      
+      showStatus(errorMessage, "error");
+    });
+}
+
+// Signup Function
+function signupWithEmail(email, password) {
+  if (!email || !password) {
+    showStatus("Please provide both email and password", "error");
+    return;
+  }
+
+  showStatus("Creating account...", "info");
+  
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(() => {
+      showStatus("Account created successfully!", "success");
+    })
+    .catch((error) => {
+      console.error("Error creating account:", error);
+      let errorMessage = "Signup failed";
+      
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = "This email is already registered. Please login instead.";
+          break;
+        case 'auth/invalid-email':
+          errorMessage = "Please enter a valid email address.";
+          break;
+        case 'auth/weak-password':
+          errorMessage = "Password should be at least 6 characters long.";
+          break;
+        default:
+          errorMessage = `Signup failed: ${error.message}`;
+      }
+      
+      showStatus(errorMessage, "error");
+    });
+}
+
+// Password Reset Function
+function resetPassword(email) {
+  if (!email) {
+    showStatus("Please provide an email address", "error");
+    return;
+  }
+
+  showStatus("Sending password reset email...", "info");
+  
+  auth.sendPasswordResetEmail(email)
+    .then(() => {
+      showStatus("Password reset email sent! Check your inbox.", "success");
+    })
+    .catch((error) => {
+      console.error("Error sending reset email:", error);
+      let errorMessage = "Password reset failed";
+      
+      switch (error.code) {
+        case 'auth/invalid-email':
+          errorMessage = "Please enter a valid email address.";
+          break;
+        case 'auth/user-not-found':
+          errorMessage = "No account found with this email address.";
+          break;
+        default:
+          errorMessage = `Password reset failed: ${error.message}`;
+      }
+      
+      showStatus(errorMessage, "error");
+    });
 }
 
 // Logout Function
 function logout() {
-  auth.signOut().catch((error) => {
-    console.error("Error logging out:", error);
-    showStatus("Logout failed: " + error.message, "error");
-  });
+  auth.signOut()
+    .then(() => {
+      showStatus("Logged out successfully", "success");
+    })
+    .catch((error) => {
+      console.error("Error logging out:", error);
+      showStatus("Logout failed: " + error.message, "error");
+    });
 }
 
-// Add Event Listeners for Login and Logout Buttons
+// Add Event Listeners
 document.getElementById("login-button").addEventListener("click", login);
 document.getElementById("logout-button").addEventListener("click", logout);
 
@@ -84,7 +195,10 @@ async function fetchExcelFile(url) {
 }
 
 async function processExcelFile(data) {
+  const status = document.getElementById("status");
   try {
+    showStatus("Processing file...", "info");
+    
     const workbook = XLSX.read(data, {
       type: "array",
       cellDates: true,
@@ -92,7 +206,7 @@ async function processExcelFile(data) {
     });
 
     if (workbook.SheetNames.length < 2) {
-      throw new Error("Excel file must contain 2 sheets");
+      throw new Error("Excel file must contain at least 2 sheets");
     }
 
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -123,12 +237,13 @@ async function processExcelFile(data) {
       historyData = historyJsonData.slice(1);
     }
 
+    showStatus("File processed successfully!", "success");
     document.querySelector(".custom-file-upload").style.display = "none";
     document.getElementById("searchContainer").style.display = "block";
     document.getElementById("searchInput").style.display = "block";
   } catch (error) {
     console.error("Error processing file:", error);
-    showStatus(error.message, "error");
+    showStatus(`Error processing file: ${error.message}`, "error");
   }
 }
 
@@ -191,26 +306,33 @@ function showStatus(message, type) {
 }
 
 function searchBME() {
-  const searchTerm = document
-    .getElementById("searchInput")
-    .value.trim()
-    .toLowerCase();
+  const searchTerm = document.getElementById("searchInput").value.trim().toLowerCase();
+  const formResult = document.getElementById("formResult");
 
   if (!workbookData) {
-    showStatus("Please select a file", "error");
+    showStatus("Please select a file first", "error");
     return;
   }
 
   if (searchTerm === "") {
-    document.getElementById("formResult").style.display = "none";
+    formResult.style.display = "none";
     return;
   }
 
-  const filteredData = workbookData.filter(
-    (row) => row["BME"].toString().toLowerCase() === searchTerm
-  );
+  // Allow partial matches and match against multiple fields
+  const filteredData = workbookData.filter((row) => {
+    const bmeMatch = row["BME"]?.toString().toLowerCase().includes(searchTerm);
+    const titleMatch = row["TITLE"]?.toString().toLowerCase().includes(searchTerm);
+    const modelMatch = row["MODEL"]?.toString().toLowerCase().includes(searchTerm);
+    return bmeMatch || titleMatch || modelMatch;
+  });
 
-  displayFormResult(filteredData[0]);
+  if (filteredData.length > 0) {
+    displayFormResult(filteredData[0]);
+  } else {
+    formResult.innerHTML = "No matching equipment found";
+    formResult.style.display = "block";
+  }
 }
 
 function displayFormResult(row) {
