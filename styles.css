@@ -230,3 +230,92 @@ body {
 .nav-btn:disabled {
   cursor: not-allowed;
 }
+
+#logout-button {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+#logout-button:hover {
+  opacity: 0.8;
+  background: none;
+}
+
+#auth-container {
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#login-form {
+  width: 100%;
+}
+
+#login-form form {
+  width: 100%;
+  margin-top: 0;
+}
+
+#login-form input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#login-form input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(75, 81, 90, 0.1);
+}
+
+.auth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.auth-buttons button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+#auth-submit-button {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+#reset-password-button {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.auth-buttons button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.auth-buttons button:active {
+  transform: translateY(0);
+}
