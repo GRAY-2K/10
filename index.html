@@ -1,59 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MEDICAL EQUIPMENT DETAILS</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="styles.css" />
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  </head>
-  <body>
-    <!-- Firebase Login/Logout Buttons -->
-    <div id="auth-buttons" style="text-align: right; padding: 1rem;">
-      <button id="login-button">Login</button>
-      <button id="logout-button" style="display: none;">Logout</button>
-    </div>
+ <head>
+   <meta charset="UTF-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <title>MEDICAL EQUIPMENT DETAILS</title>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+   <link rel="stylesheet" href="styles.css" />
+   <!-- Firebase SDK -->
+   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+ </head>
+ <body>
+   <!-- Firebase Login/Logout Buttons -->
+   <div id="auth-buttons" style="text-align: right; padding: 1rem;">
+     <button id="login-button">Login</button>
+     <button id="logout-button" style="display: none;">Logout</button>
+   </div>
 
-    <!-- App Header -->
-    <div class="header">
-      <h2>MEDICAL EQUIPMENT DETAILS</h2>
-      <div class="version"></div>
-    </div>
+   <!-- App Header -->
+   <div class="header">
+     <h2>MEDICAL EQUIPMENT DETAILS</h2>
+     <div class="version"></div>
+   </div>
 
-    <!-- App Content (Hidden until authenticated) -->
-    <div id="app-content" style="display: none;">
-      <div class="container" style="padding: 0">
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.25rem; margin-top: 2rem;">
-          <label for="fileInput" class="custom-file-upload">Upload Excel File</label>
-          <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none" />
-          <div id="status"></div>
-        </div>
-        <div id="searchContainer" style="display: none; margin-top: -4rem">
-          <div style="display: flex; justify-content: center">
-            <input type="text" id="searchInput" placeholder="Enter BME Number" />
-          </div>
-          <div id="formResult" style="text-align: center; margin-top: 2rem"></div>
-        </div>
-      </div>
-    </div>
+   <!-- App Content (Hidden until authenticated) -->
+   <div id="app-content" style="display: none;">
+     <div class="container" style="padding: 0">
+       <div 
+         style="
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           justify-content: center;
+           gap: 0.25rem;
+           margin-top: 2rem;
+         "
+       >
+         <label for="fileInput" class="custom-file-upload">Upload Excel File</label>
+         <input
+           type="file"
+           id="fileInput"
+           accept=".xlsx,.xls"
+           style="display: none"
+         />
+         <div id="status"></div>
+       </div>
+       <div id="searchContainer" style="display: none; margin-top: -4rem">
+         <div style="display: flex; justify-content: center">
+           <input
+             type="text"
+             id="searchInput"
+             placeholder="Enter BME Number"
+           />
+         </div>
+         <div
+           id="formResult"
+           style="text-align: center; margin-top: 2rem"
+         ></div>
+       </div>
+     </div>
+   </div>
 
-    <!-- Initialize Firebase -->
-    <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyCKX_fhVS7wuXysk1ddCg6m3cVtYpdcWO0",
+   <!-- Initialize Firebase -->
+   <script>
+     const firebaseConfig = {
+      apiKey: "AIzaSyCKX_fhVS7wuXysk1ddCg6m3cVtYpdcWO0",
         authDomain: "medical-equipment-details.firebaseapp.com",
         projectId: "medical-equipment-details",
         storageBucket: "medical-equipment-details.firebasestorage.app",
         messagingSenderId: "863027184737",
         appId: "1:863027184737:web:2afc922df244c6dd2e5620"
-      };
-      firebase.initializeApp(firebaseConfig);
-    </script>
+     };
+     
+     // Initialize Firebase
+     firebase.initializeApp(firebaseConfig);
+   </script>
 
-    <!-- JavaScript File -->
-    <script src="app.js"></script>
-  </body>
+   <!-- JavaScript File -->
+   <script src="app.js"></script>
+ </body>
 </html>
