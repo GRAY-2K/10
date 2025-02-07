@@ -1,6 +1,3 @@
-const auth = firebase.auth();
-const db = firebase.firestore();
-
 // Check if user is admin
 function checkAdminAuth() {
     auth.onAuthStateChanged(async (user) => {
