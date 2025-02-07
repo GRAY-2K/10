@@ -7,5 +7,13 @@ const firebaseConfig = {
     appId: "1:863027184737:web:2afc922df244c6dd2e5620"
 };
 
-// Single Firebase initialization
-firebase.initializeApp(firebaseConfig); 
+// Initialize Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Enable offline persistence
+db.enablePersistence()
+  .catch((err) => {
+    console.error("Persistence error:", err);
+  }); 
