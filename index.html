@@ -25,7 +25,8 @@
        <button id="signup-tab" class="auth-tab">Sign Up</button>
      </div>
      <div id="login-form">
-       <form onsubmit="handleAuth(); return false;">
+       <form onsubmit="handleAuth(event); return false;">
+         <div id="status"></div>
          <input type="email" id="email-input" placeholder="Email" required>
          <input type="password" id="password-input" placeholder="Password" required>
          <div class="auth-buttons">
