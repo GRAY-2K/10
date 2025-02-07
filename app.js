@@ -17,12 +17,27 @@ function checkAuth() {
     }
 
     if (user) {
-      // User is signed in
-      authContainer.style.display = "none";
-      logoutButton.style.display = "block";
-      appContent.style.display = "block";
-      if (uploadContainer) uploadContainer.style.display = "flex";
-      showStatus(`Welcome ${user.email}!`, "success");
+      // Check if user is pending approval
+      db.collection('pendingUsers').doc(user.uid).get()
+        .then((doc) => {
+          if (doc.exists && doc.data().status === 'pending') {
+            // User is pending, sign them out
+            auth.signOut();
+            showStatus("Your account is pending approval. Please wait.", "info");
+          } else {
+            // User is approved
+            authContainer.style.display = "none";
+            logoutButton.style.display = "block";
+            appContent.style.display = "block";
+            if (uploadContainer) uploadContainer.style.display = "flex";
+            showStatus(`Welcome ${user.email}!`, "success");
+          }
+        })
+        .catch((error) => {
+          console.error("Error checking approval status:", error);
+          // Sign out on error to be safe
+          auth.signOut();
+        });
     } else {
       // User is signed out
       authContainer.style.display = "block";
