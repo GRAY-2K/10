@@ -83,15 +83,14 @@ function login(email, password) {
         errorMessage = "Your account is pending approval. Please try again later.";
       } else if (error.code === 'unavailable' || error.code === 'failed-precondition') {
         errorMessage = "Network error. Please check your internet connection.";
+      } else if (error.code === 'auth/invalid-login-credentials') {
+        errorMessage = "Invalid email or password. Please try again.";
       } else {
         switch (error.code) {
           case 'auth/user-not-found':
           case 'auth/wrong-password':
-          case 'auth/invalid-login-credentials':
-            errorMessage = "Invalid email or password. Please try again.";
-            break;
           case 'auth/invalid-email':
-            errorMessage = "Please enter a valid email address.";
+            errorMessage = "Invalid email or password. Please try again.";
             break;
           case 'auth/user-disabled':
             errorMessage = "This account has been disabled. Please contact support.";
@@ -124,26 +123,29 @@ function signupWithEmail(email, password) {
 
   showStatus("Creating account...", "info");
   
+  let userId;
+  
   auth.createUserWithEmailAndPassword(email, password)
     .then((userCredential) => {
-      // Add user to pending users collection first
-      return db.collection('pendingUsers').doc(userCredential.user.uid).set({
+      userId = userCredential.user.uid;
+      // Add user to pending users collection
+      return db.collection('pendingUsers').doc(userId).set({
         email: email,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         status: 'pending'
-      }).then(() => {
-        // Important: Sign out the user immediately after adding to pending
-        return auth.signOut();
-      });
+      }, { merge: true })  // Add merge option
+    })
+    .then(() => {
+      console.log('User added to pending collection:', userId); // Add logging
+      return auth.signOut();
     })
     .then(() => {
       showStatus("Account created! Please wait for admin approval.", "success");
-      // Clear the form
       document.getElementById('email-input').value = '';
       document.getElementById('password-input').value = '';
     })
     .catch((error) => {
-      console.error("Error creating account:", error);
+      console.error("Error in signup process:", error); // Enhanced error logging
       let errorMessage = "Signup failed";
       
       switch (error.code) {
