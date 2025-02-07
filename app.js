@@ -1,309 +1,3 @@
-// Remove Firebase initialization (it's now in firebase-config.js)
-// Just start with these lines:
-const auth = firebase.auth();
-const db = firebase.firestore();
-let isSignIn = true;
-
-// Check Authentication Status
-function checkAuth() {
-  auth.onAuthStateChanged((user) => {
-    const authContainer = document.getElementById("auth-container");
-    const logoutButton = document.getElementById("logout-button");
-    const appContent = document.getElementById("app-content");
-    const uploadContainer = document.querySelector(".upload-container");
-
-    if (!authContainer || !logoutButton || !appContent) {
-      console.error("Required DOM elements not found");
-      return;
-    }
-
-    if (user) {
-      // Check if user is pending approval
-      db.collection('pendingUsers').doc(user.uid).get()
-        .catch(error => {
-          console.warn("Firestore offline, will check approval status when connection restores");
-          return { exists: false };
-        })
-        .then((doc) => {
-          if (doc.exists && doc.data().status === 'pending') {
-            // User is pending, sign them out
-            auth.signOut();
-            showStatus("Your account is pending approval. Please wait.", "info");
-          } else {
-            // User is approved or offline
-            authContainer.style.display = "none";
-            logoutButton.style.display = "block";
-            appContent.style.display = "block";
-            if (uploadContainer) uploadContainer.style.display = "flex";
-            showStatus(`Welcome ${user.email}!`, "success");
-          }
-        });
-    } else {
-      // User is signed out
-      authContainer.style.display = "block";
-      logoutButton.style.display = "none";
-      appContent.style.display = "none";
-      if (uploadContainer) uploadContainer.style.display = "none";
-    }
-  });
-}
-
-// Login Function
-function login(email, password) {
-  if (!email || !password) {
-    showStatus("Please provide both email and password", "error");
-    return;
-  }
-
-  showStatus("Logging in...", "info");
-  
-  auth.signInWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      // Check if user is approved
-      return db.collection('pendingUsers').doc(userCredential.user.uid).get()
-        .catch(error => {
-          // If Firestore is offline, allow login but will check status when online
-          console.warn("Firestore offline, will check approval status when connection restores");
-          return { exists: false };
-        });
-    })
-    .then((doc) => {
-      if (doc.exists && doc.data().status === 'pending') {
-        // User is not approved yet
-        auth.signOut();
-        throw new Error('approval_pending');
-      }
-      showStatus("Successfully logged in!", "success");
-      document.getElementById('password-input').value = '';
-    })
-    .catch((error) => {
-      console.error("Error logging in:", error);
-      let errorMessage;
-      
-      if (error.message === 'approval_pending') {
-        errorMessage = "Your account is pending approval. Please try again later.";
-      } else if (error.code === 'unavailable' || error.code === 'failed-precondition') {
-        errorMessage = "Network error. Please check your internet connection.";
-      } else if (error.code === 'auth/invalid-login-credentials') {
-        errorMessage = "Invalid email or password. Please try again.";
-      } else {
-        switch (error.code) {
-          case 'auth/user-not-found':
-          case 'auth/wrong-password':
-          case 'auth/invalid-email':
-            errorMessage = "Invalid email or password. Please try again.";
-            break;
-          case 'auth/user-disabled':
-            errorMessage = "This account has been disabled. Please contact support.";
-            break;
-          case 'auth/too-many-requests':
-            errorMessage = "Too many failed attempts. Please try again later or reset your password.";
-            break;
-          default:
-            errorMessage = "Login failed. Please check your internet connection and try again.";
-        }
-      }
-      
-      showStatus(errorMessage, "error");
-      document.getElementById('password-input').value = '';
-    });
-}
-
-// Signup Function
-function signupWithEmail(email, password) {
-  if (!email || !password) {
-    showStatus("Please provide both email and password", "error");
-    return;
-  }
-
-  // Add password validation
-  if (password.length < 8 || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-    showStatus("Your password must contain at least 8 characters including 1 special character", "error");
-    return;
-  }
-
-  showStatus("Creating account...", "info");
-  
-  let userId;
-  
-  auth.createUserWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      userId = userCredential.user.uid;
-      // Add user to pending users collection
-      return db.collection('pendingUsers').doc(userId).set({
-        email: email,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        status: 'pending'
-      });
-    })
-    .then(() => {
-      console.log('User added to pending collection:', userId);
-      return auth.signOut();
-    })
-    .then(() => {
-      showStatus("Account created! Please wait for admin approval.", "success");
-      document.getElementById('email-input').value = '';
-      document.getElementById('password-input').value = '';
-    })
-    .catch((error) => {
-      console.error("Error in signup process:", error);
-      let errorMessage = "Signup failed";
-      
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          errorMessage = "This email is already registered. Please login instead.";
-          break;
-        case 'auth/invalid-email':
-          errorMessage = "Please enter a valid email address.";
-          break;
-        case 'auth/weak-password':
-        case 'auth/password-does-not-meet-requirements':
-          errorMessage = "Your password must contain at least 8 characters including 1 special character";
-          break;
-        default:
-          errorMessage = "Signup failed. Please try again.";
-      }
-      
-      showStatus(errorMessage, "error");
-    });
-}
-
-// Password Reset Function
-function resetPassword(email) {
-  if (!email) {
-    showStatus("Please provide an email address", "error");
-    return;
-  }
-
-  showStatus("Sending password reset email...", "info");
-  
-  const actionCodeSettings = {
-    url: 'https://10-bb4.pages.dev',  // Your Cloudflare Pages domain
-    handleCodeInApp: false
-  };
-  
-  auth.sendPasswordResetEmail(email, actionCodeSettings)
-    .then(() => {
-      showStatus("Password reset email sent! Check your inbox.", "success");
-    })
-    .catch((error) => {
-      console.error("Error sending reset email:", error);
-      let errorMessage = "Password reset failed";
-      
-      switch (error.code) {
-        case 'auth/invalid-email':
-          errorMessage = "Please enter a valid email address.";
-          break;
-        case 'auth/user-not-found':
-          errorMessage = "No account found with this email address.";
-          break;
-        default:
-          errorMessage = `Password reset failed: ${error.message}`;
-      }
-      
-      showStatus(errorMessage, "error");
-    });
-}
-
-// Logout Function
-function logout() {
-  auth.signOut()
-    .then(() => {
-      showStatus("Logged out successfully", "success");
-    })
-    .catch((error) => {
-      console.error("Error logging out:", error);
-      showStatus("Logout failed: " + error.message, "error");
-    });
-}
-
-// Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
-  // Add tab switching functionality
-  const signinTab = document.getElementById('signin-tab');
-  const signupTab = document.getElementById('signup-tab');
-  const authSubmitButton = document.getElementById('auth-submit-button');
-  const logoutButton = document.getElementById('logout-button');
-
-  if (signinTab && signupTab && authSubmitButton) {
-    signinTab.addEventListener('click', () => {
-      isSignIn = true;
-      signinTab.classList.add('active');
-      signupTab.classList.remove('active');
-      authSubmitButton.textContent = 'Sign In';
-      
-      // Clear error messages and form
-      clearAuthForm();
-    });
-
-    signupTab.addEventListener('click', () => {
-      isSignIn = false;
-      signupTab.classList.add('active');
-      signinTab.classList.remove('active');
-      authSubmitButton.textContent = 'Sign Up';
-      
-      // Clear error messages and form
-      clearAuthForm();
-    });
-  }
-
-  // Add logout handler
-  if (logoutButton) {
-    logoutButton.addEventListener('click', logout);
-  }
-
-  // Add file input handler
-  const fileInput = document.getElementById("fileInput");
-  if (fileInput) {
-    fileInput.addEventListener("change", async function (e) {
-      const file = e.target.files[0];
-      if (!file) {
-        showStatus("Please select a file", "error");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        const data = new Uint8Array(e.target.result);
-        await processExcelFile(data);
-      };
-      reader.readAsArrayBuffer(file);
-    });
-  }
-
-  // Initialize Authentication Check
-  checkAuth();
-
-  // Add this after your DOM content loaded event listener
-  document.getElementById('password-input').addEventListener('input', function(e) {
-    const password = e.target.value;
-    const requirements = document.getElementById('password-requirements');
-    const lengthReq = document.getElementById('length-requirement');
-    const specialReq = document.getElementById('special-requirement');
-    
-    // Show requirements when user starts typing
-    if (password.length > 0) {
-      requirements.style.display = 'block';
-    } else {
-      requirements.style.display = 'none';
-    }
-    
-    // Check length requirement
-    if (password.length >= 8) {
-      lengthReq.classList.add('met');
-    } else {
-      lengthReq.classList.remove('met');
-    }
-    
-    // Check special character requirement
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      specialReq.classList.add('met');
-    } else {
-      specialReq.classList.remove('met');
-    }
-  });
-});
-
-// Your Existing Code for Medical Equipment Details
 let workbookData = null;
 let historyData = null;
 let headers = [];
@@ -327,21 +21,6 @@ function formatDate(value) {
     return `${day}/${month}/${year}`;
   }
   return value;
-}
-
-async function fetchExcelFile(url) {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch file: ${response.statusText}`);
-    }
-    const data = await response.arrayBuffer();
-    return data;
-  } catch (error) {
-    console.error("Error fetching file:", error);
-    showStatus(error.message, "error");
-    return null;
-  }
 }
 
 async function processExcelFile(data) {
@@ -726,42 +405,29 @@ function displayFormResult(row) {
   formResult.style.display = "block";
 }
 
-document.getElementById("searchInput").addEventListener("input", searchBME);
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    // Add file input handler
+    const fileInput = document.getElementById("fileInput");
+    if (fileInput) {
+        fileInput.addEventListener("change", async function (e) {
+            const file = e.target.files[0];
+            if (!file) {
+                showStatus("Please select a file", "error");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const data = new Uint8Array(e.target.result);
+                await processExcelFile(data);
+            };
+            reader.readAsArrayBuffer(file);
+        });
+    }
 
-function handleAuth(e) {
-  if (e) e.preventDefault();
-  
-  const email = document.getElementById('email-input').value.trim();
-  const password = document.getElementById('password-input').value;
-  
-  if (!email || !password) {
-    showStatus("Please fill in both email and password fields", "error");
-    return;
-  }
-
-  if (isSignIn) {
-    login(email, password);
-  } else {
-    signupWithEmail(email, password);
-  }
-}
-
-// Add this new function to handle clearing the form
-function clearAuthForm() {
-  // Clear input fields
-  document.getElementById('email-input').value = '';
-  document.getElementById('password-input').value = '';
-  
-  // Hide error messages
-  const status = document.getElementById('status');
-  if (status) {
-    status.style.display = 'none';
-    status.textContent = '';
-  }
-  
-  // Hide password requirements
-  const requirements = document.getElementById('password-requirements');
-  if (requirements) {
-    requirements.style.display = 'none';
-  }
-}
+    // Add search input handler
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) {
+        searchInput.addEventListener("input", searchBME);
+    }
+});
