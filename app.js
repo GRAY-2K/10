@@ -1,4 +1,5 @@
-// Initialize Firebase Auth
+// Remove Firebase initialization (it's now in firebase-config.js)
+// Just start with these lines:
 const auth = firebase.auth();
 const db = firebase.firestore();
 let isSignIn = true;
