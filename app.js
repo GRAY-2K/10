@@ -118,7 +118,12 @@ function resetPassword(email) {
 
   showStatus("Sending password reset email...", "info");
   
-  auth.sendPasswordResetEmail(email)
+  const actionCodeSettings = {
+    url: 'https://10-bb4.pages.dev',  // Your Cloudflare Pages domain
+    handleCodeInApp: false
+  };
+  
+  auth.sendPasswordResetEmail(email, actionCodeSettings)
     .then(() => {
       showStatus("Password reset email sent! Check your inbox.", "success");
     })
