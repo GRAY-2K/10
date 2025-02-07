@@ -48,7 +48,7 @@ function login(email, password) {
     })
     .catch((error) => {
       console.error("Error logging in:", error);
-      let errorMessage = "Login failed";
+      let errorMessage;
       
       switch (error.code) {
         case 'auth/user-not-found':
@@ -71,8 +71,7 @@ function login(email, password) {
       }
       
       showStatus(errorMessage, "error");
-      // Clear password field on error
-      document.getElementById('password-input').value = '';
+      document.getElementById('password-input').value = ''; // Clear password on error
     });
 }
 
@@ -359,15 +358,17 @@ function showStatus(message, type) {
   const status = document.getElementById("status");
   if (status) {
     status.textContent = message;
-    status.className = type;
+    status.className = type; // Reset classes
+    status.classList.add(type); // Add the type class
     status.style.display = "block";
     
-    // Hide status after 5 seconds if it's a success message
     if (type === "success") {
       setTimeout(() => {
         status.style.display = "none";
       }, 5000);
     }
+  } else {
+    console.error("Status element not found");
   }
 }
 
@@ -630,7 +631,7 @@ function displayFormResult(row) {
 document.getElementById("searchInput").addEventListener("input", searchBME);
 
 function handleAuth(e) {
-  if (e) e.preventDefault(); // Prevent form submission if called from form
+  if (e) e.preventDefault();
   
   const email = document.getElementById('email-input').value.trim();
   const password = document.getElementById('password-input').value;
