@@ -61,10 +61,8 @@ async function loadPendingUsers() {
     try {
         console.log('Loading pending users...');
         
-        // Use get() instead of onSnapshot
-        const snapshot = await db.collection('pendingUsers')
-            .orderBy('createdAt', 'desc')
-            .get();
+        // Simplified query without orderBy
+        const snapshot = await db.collection('pendingUsers').get();
             
         console.log('Pending users snapshot:', snapshot.size);
         pendingUsersList.innerHTML = '';
@@ -74,16 +72,20 @@ async function loadPendingUsers() {
             return;
         }
 
-        snapshot.forEach((doc) => {
-            const user = doc.data();
+        // Sort the documents in memory
+        const docs = [];
+        snapshot.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
+        docs.sort((a, b) => b.createdAt - a.createdAt);
+
+        docs.forEach((user) => {
             console.log('Pending user:', user);
             const userDiv = document.createElement('div');
             userDiv.className = 'pending-user';
             userDiv.innerHTML = `
                 <p>Email: ${user.email}</p>
                 <p>Requested: ${user.createdAt ? new Date(user.createdAt.toDate()).toLocaleString() : 'N/A'}</p>
-                <button onclick="approveUser('${doc.id}', '${user.email}')">Approve</button>
-                <button onclick="rejectUser('${doc.id}')" class="reject">Reject</button>
+                <button onclick="approveUser('${user.id}', '${user.email}')">Approve</button>
+                <button onclick="rejectUser('${user.id}')" class="reject">Reject</button>
             `;
             pendingUsersList.appendChild(userDiv);
         });
