@@ -8,6 +8,7 @@ function checkAuth() {
     const authContainer = document.getElementById("auth-container");
     const logoutButton = document.getElementById("logout-button");
     const appContent = document.getElementById("app-content");
+    const uploadContainer = document.querySelector(".upload-container");
 
     if (!authContainer || !logoutButton || !appContent) {
       console.error("Required DOM elements not found");
@@ -19,12 +20,14 @@ function checkAuth() {
       authContainer.style.display = "none";
       logoutButton.style.display = "block";
       appContent.style.display = "block";
+      if (uploadContainer) uploadContainer.style.display = "flex";
       showStatus(`Welcome ${user.email}!`, "success");
     } else {
       // User is signed out
       authContainer.style.display = "block";
       logoutButton.style.display = "none";
       appContent.style.display = "none";
+      if (uploadContainer) uploadContainer.style.display = "none";
     }
   });
 }
@@ -152,22 +155,49 @@ function logout() {
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
   // Add tab switching functionality
-  document.getElementById('signin-tab').addEventListener('click', () => {
-    isSignIn = true;
-    document.getElementById('signin-tab').classList.add('active');
-    document.getElementById('signup-tab').classList.remove('active');
-    document.getElementById('auth-submit-button').textContent = 'Sign In';
-  });
+  const signinTab = document.getElementById('signin-tab');
+  const signupTab = document.getElementById('signup-tab');
+  const authSubmitButton = document.getElementById('auth-submit-button');
+  const logoutButton = document.getElementById('logout-button');
 
-  document.getElementById('signup-tab').addEventListener('click', () => {
-    isSignIn = false;
-    document.getElementById('signup-tab').classList.add('active');
-    document.getElementById('signin-tab').classList.remove('active');
-    document.getElementById('auth-submit-button').textContent = 'Sign Up';
-  });
+  if (signinTab && signupTab && authSubmitButton) {
+    signinTab.addEventListener('click', () => {
+      isSignIn = true;
+      signinTab.classList.add('active');
+      signupTab.classList.remove('active');
+      authSubmitButton.textContent = 'Sign In';
+    });
+
+    signupTab.addEventListener('click', () => {
+      isSignIn = false;
+      signupTab.classList.add('active');
+      signinTab.classList.remove('active');
+      authSubmitButton.textContent = 'Sign Up';
+    });
+  }
 
   // Add logout handler
-  document.getElementById('logout-button').addEventListener('click', logout);
+  if (logoutButton) {
+    logoutButton.addEventListener('click', logout);
+  }
+
+  // Add file input handler
+  const fileInput = document.getElementById("fileInput");
+  if (fileInput) {
+    fileInput.addEventListener("change", async function (e) {
+      const file = e.target.files[0];
+      if (!file) {
+        showStatus("Please select a file", "error");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const data = new Uint8Array(e.target.result);
+        await processExcelFile(data);
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }
 
   // Initialize Authentication Check
   checkAuth();
@@ -215,7 +245,6 @@ async function fetchExcelFile(url) {
 }
 
 async function processExcelFile(data) {
-  const status = document.getElementById("status");
   try {
     showStatus("Processing file...", "info");
     
@@ -230,6 +259,12 @@ async function processExcelFile(data) {
     }
 
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+    const secondSheet = workbook.Sheets[workbook.SheetNames[1]];
+
+    if (!firstSheet || !secondSheet) {
+      throw new Error("Unable to read sheets from the Excel file");
+    }
+
     const equipmentData = XLSX.utils.sheet_to_json(firstSheet, {
       header: 1,
       raw: false,
@@ -238,7 +273,6 @@ async function processExcelFile(data) {
       rawNumbers: false,
     });
 
-    const secondSheet = workbook.Sheets[workbook.SheetNames[1]];
     const historyJsonData = XLSX.utils.sheet_to_json(secondSheet, {
       header: 1,
       raw: false,
@@ -247,23 +281,33 @@ async function processExcelFile(data) {
       rawNumbers: false,
     });
 
-    if (equipmentData.length > 0) {
-      headers = equipmentData[0];
-      workbookData = processWorkbookData(equipmentData);
+    if (!equipmentData || equipmentData.length === 0) {
+      throw new Error("No data found in the first sheet");
     }
 
-    if (historyJsonData.length > 0) {
+    headers = equipmentData[0];
+    workbookData = processWorkbookData(equipmentData);
+
+    if (historyJsonData && historyJsonData.length > 0) {
       historyHeaders = historyJsonData[0];
       historyData = historyJsonData.slice(1);
     }
 
     showStatus("File processed successfully!", "success");
-    document.querySelector(".custom-file-upload").style.display = "none";
-    document.getElementById("searchContainer").style.display = "block";
-    document.getElementById("searchInput").style.display = "block";
+    
+    // Update UI elements
+    const fileUploadLabel = document.querySelector(".custom-file-upload");
+    const searchContainer = document.getElementById("searchContainer");
+    const searchInput = document.getElementById("searchInput");
+    
+    if (fileUploadLabel) fileUploadLabel.style.display = "none";
+    if (searchContainer) searchContainer.style.display = "block";
+    if (searchInput) searchInput.style.display = "block";
+
   } catch (error) {
     console.error("Error processing file:", error);
     showStatus(`Error processing file: ${error.message}`, "error");
+    throw error;
   }
 }
 
@@ -307,17 +351,6 @@ function processWorkbookData(jsonData) {
     return obj;
   });
 }
-
-document
-  .getElementById("fileInput")
-  .addEventListener("change", async function (e) {
-    const file = e.target.files[0];
-    if (!file) {
-      showStatus("Please select a file", "error");
-      return;
-    }
-    await processExcelFile(file);
-  });
 
 function showStatus(message, type) {
   const status = document.getElementById("status");
