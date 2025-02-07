@@ -1,62 +1,46 @@
-// Auth0 Configuration
-const auth0Config = {
-  domain: "dev-t73j0xka47yjehi4.us.auth0.com", // Replace with your Auth0 domain
-  clientId: "TCtcOqtPEDBHHlYRG9RYBXysifAxGRMp", // Replace with your Auth0 client ID
-  authorizationParams: {
-    redirect_uri: window.location.origin, // Redirect to the current page after login
-  },
-};
+// Initialize Firebase Auth
+const auth = firebase.auth();
 
-// Initialize Auth0 Client
-const auth0 = new Auth0Client(auth0Config);
-
-// Check Authentication Status on Page Load
-async function checkAuth() {
-  const isAuthenticated = await auth0.isAuthenticated();
-  if (isAuthenticated) {
-    // User is authenticated, show the app content
-    document.getElementById("login-button").style.display = "none";
-    document.getElementById("logout-button").style.display = "block";
-    document.getElementById("app-content").style.display = "block";
-  } else {
-    // User is not authenticated, show login button
-    document.getElementById("login-button").style.display = "block";
-    document.getElementById("logout-button").style.display = "none";
-    document.getElementById("app-content").style.display = "none";
-  }
-}
-
-// Login Function
-async function login() {
-  await auth0.loginWithRedirect();
-}
-
-// Logout Function
-async function logout() {
-  await auth0.logout({
-    returnTo: window.location.origin,
+// Check Authentication Status
+function checkAuth() {
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      // User is signed in
+      document.getElementById("login-button").style.display = "none";
+      document.getElementById("logout-button").style.display = "block";
+      document.getElementById("app-content").style.display = "block";
+    } else {
+      // User is signed out
+      document.getElementById("login-button").style.display = "block";
+      document.getElementById("logout-button").style.display = "none";
+      document.getElementById("app-content").style.display = "none";
+    }
   });
 }
 
-// Handle Authentication Callback
-async function handleAuthCallback() {
-  const query = window.location.search;
-  if (query.includes("code=") && query.includes("state=")) {
-    await auth0.handleRedirectCallback();
-    window.history.replaceState({}, document.title, "/");
-    checkAuth();
-  }
+// Login Function
+function login() {
+  var provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch((error) => {
+    console.error("Error logging in:", error);
+    showStatus("Login failed: " + error.message, "error");
+  });
+}
+
+// Logout Function
+function logout() {
+  auth.signOut().catch((error) => {
+    console.error("Error logging out:", error);
+    showStatus("Logout failed: " + error.message, "error");
+  });
 }
 
 // Add Event Listeners for Login and Logout Buttons
 document.getElementById("login-button").addEventListener("click", login);
 document.getElementById("logout-button").addEventListener("click", logout);
 
-// Check Authentication Status on Page Load
-window.addEventListener("load", async () => {
-  await handleAuthCallback();
-  await checkAuth();
-});
+// Initialize Authentication Check
+checkAuth();
 
 // Your Existing Code for Medical Equipment Details
 let workbookData = null;
@@ -189,12 +173,16 @@ function processWorkbookData(jsonData) {
   });
 }
 
-async function loadExcelFromUrl(url) {
-  const data = await fetchExcelFile(url);
-  if (data) {
-    await processExcelFile(data);
-  }
-}
+document
+  .getElementById("fileInput")
+  .addEventListener("change", async function (e) {
+    const file = e.target.files[0];
+    if (!file) {
+      showStatus("Please select a file", "error");
+      return;
+    }
+    await processExcelFile(file);
+  });
 
 function showStatus(message, type) {
   const status = document.getElementById("status");
@@ -209,7 +197,7 @@ function searchBME() {
     .toLowerCase();
 
   if (!workbookData) {
-    showStatus("Please load a file first", "error");
+    showStatus("Please select a file", "error");
     return;
   }
 
@@ -451,10 +439,4 @@ function displayFormResult(row) {
   formResult.style.display = "block";
 }
 
-document
-  .getElementById("searchInput")
-  .addEventListener("input", searchBME);
-
-// Example usage:
-// Replace 'your-file-url.xlsx' with the actual URL of your Excel file
-loadExcelFromUrl('your-file-url.xlsx');
+document.getElementById("searchInput").addEventListener("input", searchBME);
