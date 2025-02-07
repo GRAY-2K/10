@@ -81,6 +81,12 @@ function signupWithEmail(email, password) {
     return;
   }
 
+  // Add password validation
+  if (password.length < 8 || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    showStatus("Your password must contain at least 8 characters including 1 special character", "error");
+    return;
+  }
+
   showStatus("Creating account...", "info");
   
   auth.createUserWithEmailAndPassword(email, password)
@@ -99,10 +105,11 @@ function signupWithEmail(email, password) {
           errorMessage = "Please enter a valid email address.";
           break;
         case 'auth/weak-password':
-          errorMessage = "Password should be at least 6 characters long.";
+        case 'auth/password-does-not-meet-requirements':
+          errorMessage = "Your password must contain at least 8 characters including 1 special character";
           break;
         default:
-          errorMessage = `Signup failed: ${error.message}`;
+          errorMessage = "Signup failed. Please try again.";
       }
       
       showStatus(errorMessage, "error");
@@ -172,6 +179,9 @@ document.addEventListener('DOMContentLoaded', function() {
       signinTab.classList.add('active');
       signupTab.classList.remove('active');
       authSubmitButton.textContent = 'Sign In';
+      
+      // Clear error messages and form
+      clearAuthForm();
     });
 
     signupTab.addEventListener('click', () => {
@@ -179,6 +189,9 @@ document.addEventListener('DOMContentLoaded', function() {
       signupTab.classList.add('active');
       signinTab.classList.remove('active');
       authSubmitButton.textContent = 'Sign Up';
+      
+      // Clear error messages and form
+      clearAuthForm();
     });
   }
 
@@ -207,6 +220,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Initialize Authentication Check
   checkAuth();
+
+  // Add this after your DOM content loaded event listener
+  document.getElementById('password-input').addEventListener('input', function(e) {
+    const password = e.target.value;
+    const requirements = document.getElementById('password-requirements');
+    const lengthReq = document.getElementById('length-requirement');
+    const specialReq = document.getElementById('special-requirement');
+    
+    // Show requirements when user starts typing
+    if (password.length > 0) {
+      requirements.style.display = 'block';
+    } else {
+      requirements.style.display = 'none';
+    }
+    
+    // Check length requirement
+    if (password.length >= 8) {
+      lengthReq.classList.add('met');
+    } else {
+      lengthReq.classList.remove('met');
+    }
+    
+    // Check special character requirement
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      specialReq.classList.add('met');
+    } else {
+      specialReq.classList.remove('met');
+    }
+  });
 });
 
 // Your Existing Code for Medical Equipment Details
@@ -649,5 +691,25 @@ function handleAuth(e) {
     login(email, password);
   } else {
     signupWithEmail(email, password);
+  }
+}
+
+// Add this new function to handle clearing the form
+function clearAuthForm() {
+  // Clear input fields
+  document.getElementById('email-input').value = '';
+  document.getElementById('password-input').value = '';
+  
+  // Hide error messages
+  const status = document.getElementById('status');
+  if (status) {
+    status.style.display = 'none';
+    status.textContent = '';
+  }
+  
+  // Hide password requirements
+  const requirements = document.getElementById('password-requirements');
+  if (requirements) {
+    requirements.style.display = 'none';
   }
 }
