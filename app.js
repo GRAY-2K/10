@@ -29,10 +29,7 @@ function checkAuth() {
 }
 
 // Login Function
-function login() {
-  const email = document.getElementById('email-input').value;
-  const password = document.getElementById('password-input').value;
-  
+function login(email, password) {
   if (!email || !password) {
     showStatus("Please provide both email and password", "error");
     return;
@@ -146,8 +143,8 @@ function logout() {
     });
 }
 
-// Add Event Listeners
-document.getElementById("login-button").addEventListener("click", login);
+// Update the event listener
+document.getElementById("signin-button").addEventListener("click", login);
 document.getElementById("logout-button").addEventListener("click", logout);
 
 // Initialize Authentication Check
@@ -562,3 +559,32 @@ function displayFormResult(row) {
 }
 
 document.getElementById("searchInput").addEventListener("input", searchBME);
+
+// Add these functions at the top of your file
+let isSignIn = true;
+
+function handleAuth() {
+  const email = document.getElementById('email-input').value;
+  const password = document.getElementById('password-input').value;
+  
+  if (isSignIn) {
+    login(email, password);
+  } else {
+    signupWithEmail(email, password);
+  }
+}
+
+// Add tab switching functionality
+document.getElementById('signin-tab').addEventListener('click', () => {
+  isSignIn = true;
+  document.getElementById('signin-tab').classList.add('active');
+  document.getElementById('signup-tab').classList.remove('active');
+  document.getElementById('auth-submit-button').textContent = 'Sign In';
+});
+
+document.getElementById('signup-tab').addEventListener('click', () => {
+  isSignIn = false;
+  document.getElementById('signup-tab').classList.add('active');
+  document.getElementById('signin-tab').classList.remove('active');
+  document.getElementById('auth-submit-button').textContent = 'Sign Up';
+});
