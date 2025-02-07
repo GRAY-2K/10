@@ -8,11 +8,18 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 
-// Initialize services
-const auth = firebase.auth();
+// Get Firestore instance
 const db = firebase.firestore();
+const auth = firebase.auth();
+
+// Log initialization
+console.log('Firebase initialized:', {
+    auth: !!auth,
+    db: !!db,
+    app: !!firebase.app()
+});
 
 // Optional: Enable offline persistence
 db.enablePersistence()
