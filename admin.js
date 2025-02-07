@@ -30,22 +30,27 @@ function checkAdminAuth() {
     });
 }
 
-// List of admin emails
+// Admin check function
 async function isAdmin(email) {
     try {
-        console.log("Checking admin status for:", email);
-        const adminDoc = await db.collection('admins').doc('config').get();
-        console.log("Admin doc exists:", adminDoc.exists);
-        
-        if (!adminDoc.exists) return false;
-        
-        const adminData = adminDoc.data();
-        console.log("Admin data:", adminData);
+        console.log("Starting admin check for:", email);
         const user = auth.currentUser;
         console.log("Current user:", user?.uid);
         
+        // First check if we can access the admins collection
+        const adminDoc = await db.collection('admins').doc('config').get();
+        console.log("Admin doc exists:", adminDoc.exists);
+        console.log("Admin doc data:", adminDoc.data());
+        
+        if (!adminDoc.exists) {
+            console.log("Admin doc doesn't exist");
+            return false;
+        }
+        
+        const adminData = adminDoc.data();
         const isAdminUser = user && adminData.adminUsers.includes(user.uid);
         console.log("Is admin user:", isAdminUser);
+        console.log("Admin users array:", adminData.adminUsers);
         
         return isAdminUser;
     } catch (error) {
