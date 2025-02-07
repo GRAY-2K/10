@@ -1,5 +1,6 @@
 // Initialize Firebase Auth
 const auth = firebase.auth();
+let isSignIn = true;
 
 // Check Authentication Status
 function checkAuth() {
@@ -143,12 +144,26 @@ function logout() {
     });
 }
 
-// Update the event listener
-document.getElementById("signin-button").addEventListener("click", login);
-document.getElementById("logout-button").addEventListener("click", logout);
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // Add tab switching functionality
+  document.getElementById('signin-tab').addEventListener('click', () => {
+    isSignIn = true;
+    document.getElementById('signin-tab').classList.add('active');
+    document.getElementById('signup-tab').classList.remove('active');
+    document.getElementById('auth-submit-button').textContent = 'Sign In';
+  });
 
-// Initialize Authentication Check
-checkAuth();
+  document.getElementById('signup-tab').addEventListener('click', () => {
+    isSignIn = false;
+    document.getElementById('signup-tab').classList.add('active');
+    document.getElementById('signin-tab').classList.remove('active');
+    document.getElementById('auth-submit-button').textContent = 'Sign Up';
+  });
+
+  // Initialize Authentication Check
+  checkAuth();
+});
 
 // Your Existing Code for Medical Equipment Details
 let workbookData = null;
@@ -560,9 +575,6 @@ function displayFormResult(row) {
 
 document.getElementById("searchInput").addEventListener("input", searchBME);
 
-// Add these functions at the top of your file
-let isSignIn = true;
-
 function handleAuth() {
   const email = document.getElementById('email-input').value;
   const password = document.getElementById('password-input').value;
@@ -573,18 +585,3 @@ function handleAuth() {
     signupWithEmail(email, password);
   }
 }
-
-// Add tab switching functionality
-document.getElementById('signin-tab').addEventListener('click', () => {
-  isSignIn = true;
-  document.getElementById('signin-tab').classList.add('active');
-  document.getElementById('signup-tab').classList.remove('active');
-  document.getElementById('auth-submit-button').textContent = 'Sign In';
-});
-
-document.getElementById('signup-tab').addEventListener('click', () => {
-  isSignIn = false;
-  document.getElementById('signup-tab').classList.add('active');
-  document.getElementById('signin-tab').classList.remove('active');
-  document.getElementById('auth-submit-button').textContent = 'Sign Up';
-});
