@@ -1,5 +1,6 @@
 // Initialize Firebase Auth
 const auth = firebase.auth();
+const db = firebase.firestore();
 let isSignIn = true;
 
 // Check Authentication Status
@@ -42,35 +43,51 @@ function login(email, password) {
   showStatus("Logging in...", "info");
   
   auth.signInWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      // Check if user is approved
+      return db.collection('pendingUsers').doc(userCredential.user.uid).get()
+        .then((doc) => {
+          if (doc.exists && doc.data().status === 'pending') {
+            // User is not approved yet
+            auth.signOut();
+            throw new Error('approval_pending');
+          }
+          return userCredential;
+        });
+    })
     .then(() => {
       showStatus("Successfully logged in!", "success");
-      document.getElementById('password-input').value = ''; // Clear password for security
+      document.getElementById('password-input').value = '';
     })
     .catch((error) => {
       console.error("Error logging in:", error);
       let errorMessage;
       
-      switch (error.code) {
-        case 'auth/user-not-found':
-        case 'auth/wrong-password':
-        case 'auth/invalid-login-credentials':
-          errorMessage = "Invalid email or password. Please try again.";
-          break;
-        case 'auth/invalid-email':
-          errorMessage = "Please enter a valid email address.";
-          break;
-        case 'auth/user-disabled':
-          errorMessage = "This account has been disabled. Please contact support.";
-          break;
-        case 'auth/too-many-requests':
-          errorMessage = "Too many failed attempts. Please try again later or reset your password.";
-          break;
-        default:
-          errorMessage = "Login failed. Please try again.";
+      if (error.message === 'approval_pending') {
+        errorMessage = "Your account is pending approval. Please try again later.";
+      } else {
+        switch (error.code) {
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+          case 'auth/invalid-login-credentials':
+            errorMessage = "Invalid email or password. Please try again.";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "Please enter a valid email address.";
+            break;
+          case 'auth/user-disabled':
+            errorMessage = "This account has been disabled. Please contact support.";
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = "Too many failed attempts. Please try again later or reset your password.";
+            break;
+          default:
+            errorMessage = "Login failed. Please try again.";
+        }
       }
       
       showStatus(errorMessage, "error");
-      document.getElementById('password-input').value = ''; // Clear password on error
+      document.getElementById('password-input').value = '';
     });
 }
 
@@ -90,8 +107,22 @@ function signupWithEmail(email, password) {
   showStatus("Creating account...", "info");
   
   auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      // Disable the user immediately after creation
+      auth.currentUser.getIdToken(true);
+      
+      // Add user to pending users collection
+      return db.collection('pendingUsers').doc(userCredential.user.uid).set({
+        email: email,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        status: 'pending'
+      }).then(() => {
+        // Sign out the user until approved
+        return auth.signOut();
+      });
+    })
     .then(() => {
-      showStatus("Account created successfully!", "success");
+      showStatus("Account created! Please wait for admin approval.", "success");
     })
     .catch((error) => {
       console.error("Error creating account:", error);
