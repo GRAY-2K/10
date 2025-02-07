@@ -19,24 +19,23 @@ function checkAuth() {
     if (user) {
       // Check if user is pending approval
       db.collection('pendingUsers').doc(user.uid).get()
+        .catch(error => {
+          console.warn("Firestore offline, will check approval status when connection restores");
+          return { exists: false };
+        })
         .then((doc) => {
           if (doc.exists && doc.data().status === 'pending') {
             // User is pending, sign them out
             auth.signOut();
             showStatus("Your account is pending approval. Please wait.", "info");
           } else {
-            // User is approved
+            // User is approved or offline
             authContainer.style.display = "none";
             logoutButton.style.display = "block";
             appContent.style.display = "block";
             if (uploadContainer) uploadContainer.style.display = "flex";
             showStatus(`Welcome ${user.email}!`, "success");
           }
-        })
-        .catch((error) => {
-          console.error("Error checking approval status:", error);
-          // Sign out on error to be safe
-          auth.signOut();
         });
     } else {
       // User is signed out
@@ -61,16 +60,18 @@ function login(email, password) {
     .then((userCredential) => {
       // Check if user is approved
       return db.collection('pendingUsers').doc(userCredential.user.uid).get()
-        .then((doc) => {
-          if (doc.exists && doc.data().status === 'pending') {
-            // User is not approved yet
-            auth.signOut();
-            throw new Error('approval_pending');
-          }
-          return userCredential;
+        .catch(error => {
+          // If Firestore is offline, allow login but will check status when online
+          console.warn("Firestore offline, will check approval status when connection restores");
+          return { exists: false };
         });
     })
-    .then(() => {
+    .then((doc) => {
+      if (doc.exists && doc.data().status === 'pending') {
+        // User is not approved yet
+        auth.signOut();
+        throw new Error('approval_pending');
+      }
       showStatus("Successfully logged in!", "success");
       document.getElementById('password-input').value = '';
     })
@@ -80,6 +81,8 @@ function login(email, password) {
       
       if (error.message === 'approval_pending') {
         errorMessage = "Your account is pending approval. Please try again later.";
+      } else if (error.code === 'unavailable' || error.code === 'failed-precondition') {
+        errorMessage = "Network error. Please check your internet connection.";
       } else {
         switch (error.code) {
           case 'auth/user-not-found':
@@ -97,7 +100,7 @@ function login(email, password) {
             errorMessage = "Too many failed attempts. Please try again later or reset your password.";
             break;
           default:
-            errorMessage = "Login failed. Please try again.";
+            errorMessage = "Login failed. Please check your internet connection and try again.";
         }
       }
       
