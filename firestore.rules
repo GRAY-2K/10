@@ -1,10 +1,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow reading admins collection for authenticated users
+    // Debug rule - allow all reads to admins collection
     match /admins/{document=**} {
-      allow read: if request.auth != null;
-      allow write: if false;  // Only allow writes through admin console
+      allow read: if true;  // Temporarily allow all reads for testing
+      allow write: if false;
     }
     
     // Rules for pending users collection
@@ -22,12 +22,9 @@ service cloud.firestore {
     
     // Admin check function
     function isAdmin() {
-      let adminDoc = get(/databases/$(database)/documents/admins/config);
       return request.auth != null && 
-             adminDoc != null && 
-             adminDoc.data != null && 
-             adminDoc.data.adminUsers != null &&
-             request.auth.uid in adminDoc.data.adminUsers;
+             exists(/databases/$(database)/documents/admins/config) &&
+             request.auth.uid in get(/databases/$(database)/documents/admins/config).data.adminUsers;
     }
   }
 } 
