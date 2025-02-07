@@ -47,8 +47,7 @@ function login(email, password) {
     })
     .catch((error) => {
       console.error("Error logging in:", error);
-      let errorMessage = "Invalid email or password. Please try again.";
-      showStatus(errorMessage, "error");
+      showStatus("Invalid email or password", "error");
       document.getElementById('password-input').value = ''; // Clear password on error
     });
 }
@@ -56,62 +55,77 @@ function login(email, password) {
 // Password Reset Function
 function resetPassword(email) {
   if (!email) {
-    showStatus("Please provide an email address", "error");
+    showStatus("Please enter your email first", "error");
     return;
   }
 
-  showStatus("Sending password reset email...", "info");
-  
   const actionCodeSettings = {
-    url: 'https://10-bb4.pages.dev',  // Your Cloudflare Pages domain
-    handleCodeInApp: false
+    url: 'https://10-bb4.pages.dev'
   };
-  
+
   auth.sendPasswordResetEmail(email, actionCodeSettings)
     .then(() => {
-      showStatus("Password reset email sent! Check your inbox.", "success");
+      showStatus("Password reset email sent!", "success");
     })
     .catch((error) => {
-      console.error("Error sending reset email:", error);
-      showStatus("Failed to send reset email. Please try again.", "error");
+      showStatus("Failed to send reset email", "error");
     });
 }
 
 // Logout Function
 function logout() {
-  auth.signOut()
-    .then(() => {
-      showStatus("Logged out successfully", "success");
-    })
-    .catch((error) => {
-      console.error("Error logging out:", error);
-      showStatus("Logout failed: " + error.message, "error");
-    });
+  auth.signOut().then(() => {
+    document.getElementById('email-input').value = '';
+    document.getElementById('password-input').value = '';
+    showStatus("Logged out successfully", "success");
+  }).catch((error) => {
+    showStatus("Logout failed", "error");
+  });
 }
 
-// Handle Auth Form Submit
-function handleAuth(e) {
-  if (e) e.preventDefault();
-  
-  const email = document.getElementById('email-input').value.trim();
-  const password = document.getElementById('password-input').value;
-  
-  if (!email || !password) {
-    showStatus("Please fill in both email and password fields", "error");
-    return;
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize auth check
+  checkAuth();
+
+  // Form submit handler
+  const form = document.getElementById('auth-form');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email-input').value.trim();
+      const password = document.getElementById('password-input').value;
+      login(email, password);
+    });
   }
 
-  login(email, password);
-}
-
-// Initialize auth check and add logout handler
-document.addEventListener('DOMContentLoaded', function() {
+  // Logout button handler
   const logoutButton = document.getElementById('logout-button');
   if (logoutButton) {
     logoutButton.addEventListener('click', logout);
   }
 
-  checkAuth();
+  // Reset password button handler
+  const resetButton = document.getElementById('reset-password-button');
+  if (resetButton) {
+    resetButton.addEventListener('click', function() {
+      const email = document.getElementById('email-input').value.trim();
+      resetPassword(email);
+    });
+  }
+
+  // File input handler
+  const fileInput = document.getElementById("fileInput");
+  if (fileInput) {
+    fileInput.addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (!file) {
+        showStatus("Please select a file", "error");
+        return;
+      }
+      processExcelFile(file);
+    });
+  }
 });
 
 // Status Message Function
@@ -125,13 +139,12 @@ function showStatus(message, type) {
     if (type === "success") {
       setTimeout(() => {
         status.style.display = "none";
-      }, 5000);
+      }, 3000);
     }
   }
 }
 
-// Excel File Processing Functions
-[... Rest of your existing Excel processing code stays exactly the same, 
+[... Rest of your existing Excel processing code stays exactly the same ...]
     from the let workbookData = null declaration 
     to the end of the file, including all the 
     functions for processing Excel files, searching, 
