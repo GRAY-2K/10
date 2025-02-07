@@ -36,27 +36,13 @@ async function isAdmin(email) {
         console.log("=== Admin Check Debug ===");
         const user = auth.currentUser;
         console.log("1. Current User:", user ? "exists" : "null");
-        console.log("2. User UID:", user?.uid);
+        console.log("2. User Email:", user?.email);
         
-        // First check if we can access the admins collection
-        console.log("3. Attempting to access admins collection...");
-        const adminDoc = await db.collection('admins').doc('config').get();
-        console.log("4. Admin Doc Access:", adminDoc ? "success" : "failed");
-        console.log("5. Admin Doc Exists:", adminDoc.exists);
+        // Simple domain check
+        const isAdminDomain = user?.email?.endsWith('@yourdomain.com');
+        console.log("3. Is Admin Domain:", isAdminDomain);
         
-        if (!adminDoc.exists) {
-            console.log("6. Error: Admin doc doesn't exist");
-            return false;
-        }
-        
-        const adminData = adminDoc.data();
-        console.log("7. Admin Data:", adminData);
-        console.log("8. Admin Users Array:", adminData.adminUsers);
-        
-        const isAdminUser = user && adminData.adminUsers.includes(user.uid);
-        console.log("9. Is Admin Result:", isAdminUser);
-        
-        return isAdminUser;
+        return isAdminDomain;
     } catch (error) {
         console.error("10. Error in admin check:", error);
         console.error("Error details:", {
