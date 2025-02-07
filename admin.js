@@ -33,12 +33,21 @@ function checkAdminAuth() {
 // List of admin emails
 async function isAdmin(email) {
     try {
+        console.log("Checking admin status for:", email);
         const adminDoc = await db.collection('admins').doc('config').get();
+        console.log("Admin doc exists:", adminDoc.exists);
+        
         if (!adminDoc.exists) return false;
         
         const adminData = adminDoc.data();
+        console.log("Admin data:", adminData);
         const user = auth.currentUser;
-        return user && adminData.adminUsers.includes(user.uid);
+        console.log("Current user:", user?.uid);
+        
+        const isAdminUser = user && adminData.adminUsers.includes(user.uid);
+        console.log("Is admin user:", isAdminUser);
+        
+        return isAdminUser;
     } catch (error) {
         console.error("Error checking admin status:", error);
         return false;
