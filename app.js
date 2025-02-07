@@ -5,24 +5,24 @@ let isSignIn = true;
 // Check Authentication Status
 function checkAuth() {
   auth.onAuthStateChanged((user) => {
-    const loginForm = document.getElementById("login-form");
+    const authContainer = document.getElementById("auth-container");
     const logoutButton = document.getElementById("logout-button");
     const appContent = document.getElementById("app-content");
 
-    if (!loginForm || !logoutButton || !appContent) {
+    if (!authContainer || !logoutButton || !appContent) {
       console.error("Required DOM elements not found");
       return;
     }
 
     if (user) {
       // User is signed in
-      loginForm.style.display = "none";
+      authContainer.style.display = "none";
       logoutButton.style.display = "block";
       appContent.style.display = "block";
       showStatus(`Welcome ${user.email}!`, "success");
     } else {
       // User is signed out
-      loginForm.style.display = "block";
+      authContainer.style.display = "block";
       logoutButton.style.display = "none";
       appContent.style.display = "none";
     }
@@ -49,7 +49,7 @@ function login(email, password) {
       switch (error.code) {
         case 'auth/user-not-found':
         case 'auth/wrong-password':
-          errorMessage = "Invalid email or password.";
+          errorMessage = "Invalid email or password. Please try again.";
           break;
         case 'auth/invalid-email':
           errorMessage = "Please enter a valid email address.";
@@ -57,11 +57,16 @@ function login(email, password) {
         case 'auth/user-disabled':
           errorMessage = "This account has been disabled.";
           break;
+        case 'auth/too-many-requests':
+          errorMessage = "Too many failed attempts. Please try again later.";
+          break;
         default:
           errorMessage = `Login failed: ${error.message}`;
       }
       
       showStatus(errorMessage, "error");
+      // Clear password field on error
+      document.getElementById('password-input').value = '';
     });
 }
 
@@ -160,6 +165,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('signin-tab').classList.remove('active');
     document.getElementById('auth-submit-button').textContent = 'Sign Up';
   });
+
+  // Add logout handler
+  document.getElementById('logout-button').addEventListener('click', logout);
 
   // Initialize Authentication Check
   checkAuth();
