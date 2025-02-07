@@ -44,6 +44,7 @@ function login(email, password) {
   auth.signInWithEmailAndPassword(email, password)
     .then(() => {
       showStatus("Successfully logged in!", "success");
+      document.getElementById('password-input').value = ''; // Clear password for security
     })
     .catch((error) => {
       console.error("Error logging in:", error);
@@ -51,17 +52,19 @@ function login(email, password) {
       
       switch (error.code) {
         case 'auth/user-not-found':
+          errorMessage = "No account found with this email. Please sign up first.";
+          break;
         case 'auth/wrong-password':
-          errorMessage = "Invalid email or password. Please try again.";
+          errorMessage = "Incorrect password. Please try again.";
           break;
         case 'auth/invalid-email':
           errorMessage = "Please enter a valid email address.";
           break;
         case 'auth/user-disabled':
-          errorMessage = "This account has been disabled.";
+          errorMessage = "This account has been disabled. Please contact support.";
           break;
         case 'auth/too-many-requests':
-          errorMessage = "Too many failed attempts. Please try again later.";
+          errorMessage = "Too many failed attempts. Please try again later or reset your password.";
           break;
         default:
           errorMessage = `Login failed: ${error.message}`;
@@ -354,8 +357,18 @@ function processWorkbookData(jsonData) {
 
 function showStatus(message, type) {
   const status = document.getElementById("status");
-  status.textContent = message;
-  status.className = type;
+  if (status) {
+    status.textContent = message;
+    status.className = type;
+    status.style.display = "block";
+    
+    // Hide status after 5 seconds if it's a success message
+    if (type === "success") {
+      setTimeout(() => {
+        status.style.display = "none";
+      }, 5000);
+    }
+  }
 }
 
 function searchBME() {
@@ -616,10 +629,17 @@ function displayFormResult(row) {
 
 document.getElementById("searchInput").addEventListener("input", searchBME);
 
-function handleAuth() {
-  const email = document.getElementById('email-input').value;
+function handleAuth(e) {
+  if (e) e.preventDefault(); // Prevent form submission if called from form
+  
+  const email = document.getElementById('email-input').value.trim();
   const password = document.getElementById('password-input').value;
   
+  if (!email || !password) {
+    showStatus("Please fill in both email and password fields", "error");
+    return;
+  }
+
   if (isSignIn) {
     login(email, password);
   } else {
