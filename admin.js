@@ -33,9 +33,8 @@ function checkAdminAuth() {
 // Admin check function
 async function isAdmin(email) {
     try {
-        console.log("Starting admin check for:", email);
         const user = auth.currentUser;
-        console.log("Current user:", user?.uid);
+        console.log("Copy this UID:", user.uid);
         
         // First check if we can access the admins collection
         const adminDoc = await db.collection('admins').doc('config').get();
