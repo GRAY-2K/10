@@ -39,7 +39,7 @@ async function isAdmin(email) {
         console.log("2. User Email:", user?.email);
         
         // Simple domain check
-        const isAdminDomain = user?.email?.endsWith('@yourdomain.com');
+        const isAdminDomain = user?.email?.endsWith('@gmail.com') && user?.email === 'xer444@gmail.com';
         console.log("3. Is Admin Domain:", isAdminDomain);
         
         return isAdminDomain;
