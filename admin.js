@@ -3,19 +3,26 @@ const db = firebase.firestore();
 
 // Check if user is admin
 function checkAdminAuth() {
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged(async (user) => {
         const adminContainer = document.getElementById("admin-container");
         const authContainer = document.getElementById("auth-container");
         const logoutButton = document.getElementById("logout-button");
 
-        if (user && isAdmin(user.email)) {
-            // Admin is signed in
-            adminContainer.style.display = "block";
-            authContainer.style.display = "none";
-            logoutButton.style.display = "block";
-            loadPendingUsers();
+        if (user) {
+            const adminStatus = await isAdmin(user.email);
+            if (adminStatus) {
+                // Admin is signed in
+                adminContainer.style.display = "block";
+                authContainer.style.display = "none";
+                logoutButton.style.display = "block";
+                loadPendingUsers();
+            } else {
+                // Not admin
+                showStatus("Access denied. Admin only.", "error");
+                auth.signOut();
+            }
         } else {
-            // Not admin or signed out
+            // Signed out
             adminContainer.style.display = "none";
             authContainer.style.display = "block";
             logoutButton.style.display = "none";
@@ -24,11 +31,18 @@ function checkAdminAuth() {
 }
 
 // List of admin emails
-function isAdmin(email) {
-    const adminEmails = [
-        "xer444@gmail.com"  // Admin email
-    ];
-    return adminEmails.includes(email);
+async function isAdmin(email) {
+    try {
+        const adminDoc = await db.collection('admins').doc('config').get();
+        if (!adminDoc.exists) return false;
+        
+        const adminData = adminDoc.data();
+        const user = auth.currentUser;
+        return user && adminData.adminUsers.includes(user.uid);
+    } catch (error) {
+        console.error("Error checking admin status:", error);
+        return false;
+    }
 }
 
 // Load pending users
@@ -70,7 +84,20 @@ function loadPendingUsers() {
 // Approve user
 async function approveUser(userId, userEmail) {
     try {
+        // Get user data before deleting
+        const userDoc = await db.collection('pendingUsers').doc(userId).get();
+        const userData = userDoc.data();
+        
+        // Delete from pending users
         await db.collection('pendingUsers').doc(userId).delete();
+        
+        // Add to approved users collection (optional)
+        await db.collection('approvedUsers').doc(userId).set({
+            email: userEmail,
+            approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            ...userData
+        });
+        
         showStatus("User approved successfully!", "success");
     } catch (error) {
         console.error("Error approving user:", error);
@@ -90,25 +117,19 @@ async function rejectUser(userId) {
 }
 
 // Admin login
-function handleAdminLogin(e) {
+async function handleAdminLogin(e) {
     e.preventDefault();
     
     const email = document.getElementById('email-input').value.trim();
     const password = document.getElementById('password-input').value;
 
-    if (!isAdmin(email)) {
-        showStatus("Access denied. Admin only.", "error");
-        return;
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+        // isAdmin check will be handled by onAuthStateChanged
+    } catch (error) {
+        console.error("Login error:", error);
+        showStatus("Invalid email or password", "error");
     }
-
-    auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-            showStatus("Admin logged in successfully!", "success");
-        })
-        .catch((error) => {
-            console.error("Login error:", error);
-            showStatus("Login failed: " + error.message, "error");
-        });
 }
 
 // Logout
