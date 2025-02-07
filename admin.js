@@ -60,18 +60,31 @@ async function loadPendingUsers() {
     const pendingUsersList = document.getElementById("pending-users-list");
     
     try {
-        console.log('Loading pending users...');
+        console.log('=== Loading Pending Users ===');
+        console.log('1. Getting collection reference...');
+        const pendingRef = db.collection('pendingUsers');
         
-        // Simplified query without orderBy
-        const snapshot = await db.collection('pendingUsers').get();
-            
-        console.log('Pending users snapshot:', snapshot.size);
+        console.log('2. Attempting to get documents...');
+        const snapshot = await pendingRef.get();
+        
+        console.log('3. Got snapshot:', {
+            empty: snapshot.empty,
+            size: snapshot.size,
+            metadata: snapshot.metadata
+        });
+        
         pendingUsersList.innerHTML = '';
         
         if (snapshot.empty) {
+            console.log('4. No documents found');
             pendingUsersList.innerHTML = '<p>No pending users</p>';
             return;
         }
+
+        console.log('4. Processing documents...');
+        snapshot.forEach((doc) => {
+            console.log('Document data:', doc.id, doc.data());
+        });
 
         // Sort the documents in memory
         const docs = [];
@@ -91,7 +104,11 @@ async function loadPendingUsers() {
             pendingUsersList.appendChild(userDiv);
         });
     } catch (error) {
-        console.error('Error loading pending users:', error);
+        console.error('Error details:', {
+            code: error.code,
+            message: error.message,
+            stack: error.stack
+        });
         pendingUsersList.innerHTML = '<p>Error loading pending users</p>';
     }
 }
