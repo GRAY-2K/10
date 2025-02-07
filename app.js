@@ -133,10 +133,10 @@ function signupWithEmail(email, password) {
         email: email,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         status: 'pending'
-      }, { merge: true })  // Add merge option
+      });
     })
     .then(() => {
-      console.log('User added to pending collection:', userId); // Add logging
+      console.log('User added to pending collection:', userId);
       return auth.signOut();
     })
     .then(() => {
@@ -145,7 +145,7 @@ function signupWithEmail(email, password) {
       document.getElementById('password-input').value = '';
     })
     .catch((error) => {
-      console.error("Error in signup process:", error); // Enhanced error logging
+      console.error("Error in signup process:", error);
       let errorMessage = "Signup failed";
       
       switch (error.code) {
