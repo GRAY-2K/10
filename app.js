@@ -108,21 +108,21 @@ function signupWithEmail(email, password) {
   
   auth.createUserWithEmailAndPassword(email, password)
     .then((userCredential) => {
-      // Disable the user immediately after creation
-      auth.currentUser.getIdToken(true);
-      
-      // Add user to pending users collection
+      // Add user to pending users collection first
       return db.collection('pendingUsers').doc(userCredential.user.uid).set({
         email: email,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         status: 'pending'
       }).then(() => {
-        // Sign out the user until approved
+        // Important: Sign out the user immediately after adding to pending
         return auth.signOut();
       });
     })
     .then(() => {
       showStatus("Account created! Please wait for admin approval.", "success");
+      // Clear the form
+      document.getElementById('email-input').value = '';
+      document.getElementById('password-input').value = '';
     })
     .catch((error) => {
       console.error("Error creating account:", error);
