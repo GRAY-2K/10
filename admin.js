@@ -35,9 +35,12 @@ function isAdmin(email) {
 function loadPendingUsers() {
     const pendingUsersList = document.getElementById("pending-users-list");
     
+    console.log('Loading pending users...');
+    
     db.collection('pendingUsers')
-        .where('status', '==', 'pending')
+        .orderBy('createdAt', 'desc')
         .onSnapshot((snapshot) => {
+            console.log('Pending users snapshot:', snapshot.size);
             pendingUsersList.innerHTML = '';
             
             if (snapshot.empty) {
@@ -47,6 +50,7 @@ function loadPendingUsers() {
 
             snapshot.forEach((doc) => {
                 const user = doc.data();
+                console.log('Pending user:', user);
                 const userDiv = document.createElement('div');
                 userDiv.className = 'pending-user';
                 userDiv.innerHTML = `
@@ -57,6 +61,9 @@ function loadPendingUsers() {
                 `;
                 pendingUsersList.appendChild(userDiv);
             });
+        }, (error) => {
+            console.error('Error loading pending users:', error);
+            pendingUsersList.innerHTML = '<p>Error loading pending users</p>';
         });
 }
 
