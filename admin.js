@@ -33,27 +33,37 @@ function checkAdminAuth() {
 // Admin check function
 async function isAdmin(email) {
     try {
+        console.log("=== Admin Check Debug ===");
         const user = auth.currentUser;
-        console.log("Copy this UID:", user.uid);
+        console.log("1. Current User:", user ? "exists" : "null");
+        console.log("2. User UID:", user?.uid);
         
         // First check if we can access the admins collection
+        console.log("3. Attempting to access admins collection...");
         const adminDoc = await db.collection('admins').doc('config').get();
-        console.log("Admin doc exists:", adminDoc.exists);
-        console.log("Admin doc data:", adminDoc.data());
+        console.log("4. Admin Doc Access:", adminDoc ? "success" : "failed");
+        console.log("5. Admin Doc Exists:", adminDoc.exists);
         
         if (!adminDoc.exists) {
-            console.log("Admin doc doesn't exist");
+            console.log("6. Error: Admin doc doesn't exist");
             return false;
         }
         
         const adminData = adminDoc.data();
+        console.log("7. Admin Data:", adminData);
+        console.log("8. Admin Users Array:", adminData.adminUsers);
+        
         const isAdminUser = user && adminData.adminUsers.includes(user.uid);
-        console.log("Is admin user:", isAdminUser);
-        console.log("Admin users array:", adminData.adminUsers);
+        console.log("9. Is Admin Result:", isAdminUser);
         
         return isAdminUser;
     } catch (error) {
-        console.error("Error checking admin status:", error);
+        console.error("10. Error in admin check:", error);
+        console.error("Error details:", {
+            code: error.code,
+            message: error.message,
+            stack: error.stack
+        });
         return false;
     }
 }
