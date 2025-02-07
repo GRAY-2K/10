@@ -20,24 +20,11 @@
 
    <!-- Auth Container -->
    <div id="auth-container">
-     <div class="auth-tabs">
-       <button id="signin-tab" class="auth-tab active">Sign In</button>
-       <button id="signup-tab" class="auth-tab">Sign Up</button>
-     </div>
      <div id="login-form">
        <form onsubmit="handleAuth(event); return false;">
          <div id="status"></div>
          <input type="email" id="email-input" placeholder="Email" required>
          <input type="password" id="password-input" placeholder="Password" required>
-         <div id="password-requirements" class="password-requirements" style="display: none;">
-           <p>Password requirements:</p>
-           <div class="requirement" id="length-requirement">
-             <span class="check">✓</span> At least 8 characters
-           </div>
-           <div class="requirement" id="special-requirement">
-             <span class="check">✓</span> At least 1 special character
-           </div>
-         </div>
          <div class="auth-buttons">
            <button type="submit" id="auth-submit-button">Sign In</button>
            <button type="button" id="reset-password-button" onclick="resetPassword(document.getElementById('email-input').value)">Forgot Password?</button>
