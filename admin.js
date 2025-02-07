@@ -39,6 +39,10 @@ async function isAdmin(email) {
         const isAdminDomain = user?.email?.endsWith('@gmail.com') && user?.email === 'xer444@gmail.com';
         console.log("3. Is Admin Domain:", isAdminDomain);
         
+        if (isAdminDomain) {
+            testFirestore(); // Run test when admin is confirmed
+        }
+        
         return isAdminDomain;
     } catch (error) {
         console.error("10. Error in admin check:", error);
@@ -168,6 +172,31 @@ function showStatus(message, type) {
                 status.style.display = "none";
             }, 5000);
         }
+    }
+}
+
+// Add this function
+async function testFirestore() {
+    try {
+        console.log("=== Testing Firestore Access ===");
+        // Try to list all collections
+        const collections = await db.listCollections();
+        console.log("Collections:", collections);
+        
+        // Try to read pendingUsers
+        const pendingRef = db.collection('pendingUsers');
+        const test = await pendingRef.limit(1).get();
+        console.log("Can read pendingUsers:", !test.empty);
+        
+        // Log the current user
+        const user = auth.currentUser;
+        console.log("Current user:", {
+            email: user.email,
+            uid: user.uid,
+            emailVerified: user.emailVerified
+        });
+    } catch (error) {
+        console.error("Test failed:", error);
     }
 }
 
