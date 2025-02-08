@@ -16,7 +16,7 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, sans-serif;
-  background-color: var(--background-color);
+  background-color: #f0f0f0;
   color: var(--text-color);
   line-height: 0.85;
 }
@@ -34,6 +34,7 @@ body {
   margin-bottom: 2rem;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   position: relative;
+  display: none;
 }
 
 .version {
@@ -255,14 +256,15 @@ body {
 /* Auth Container Styles */
 #auth-container {
   max-width: 450px;
-  margin: 2rem auto;
+  margin: 8rem auto;
   padding: 2rem;
   background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 2;
 }
 
 #login-form {
@@ -317,8 +319,8 @@ body {
 }
 
 #reset-password-button {
-  background-color: #f0f0f0;
-  color: #666;
+  background-color: #f0f0f0;  /* Light gray background */
+  color: #666;  /* Dark gray text */
 }
 
 .auth-buttons button:hover {
@@ -345,4 +347,96 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.blur-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background-color: #f0f0f0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.login-header {
+  margin-bottom: 2rem;
+  color: var(--primary-color);
+}
+
+.login-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.login-header h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0 12px;
+}
+
+.remember-me {
+    display: flex;
+    align-items: baseline;
+    color: #666;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.remember-me input[type="checkbox"] {
+    margin: 0 2px 0 0;
+    width: 14px;
+    height: 14px;
+    transform: scale(0.75);
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid #666;
+    background: white;
+    cursor: pointer;
+}
+
+.remember-me input[type="checkbox"]:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    position: relative;
+}
+
+.remember-me input[type="checkbox"]:checked::after {
+    content: '✓';
+    color: white;
+    position: absolute;
+    left: 4px;
+    top: -2px;
+    font-size: 20px;
+}
+
+.remember-me span {
+    margin-top: 10px;  /* Increase the negative margin */
+    display: inline-block;
+    position: relative;  /* Add this */
+    top: -5px;         /* Add this to help move it up */
+}
+
+.forgot-password {
+    color: #666;
+    text-decoration: none;
+    font-size: 0.9rem;
+    position: relative;  /* Add this */
+    top: -5px;          /* Add this to match "Remember me" height */
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
 }
