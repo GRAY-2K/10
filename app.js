@@ -8,6 +8,7 @@ function checkAuth() {
     const logoutButton = document.getElementById("logout-button");
     const appContent = document.getElementById("app-content");
     const uploadContainer = document.querySelector(".upload-container");
+    const blurBackground = document.querySelector(".blur-background");
 
     if (!authContainer || !logoutButton || !appContent) {
       console.error("Required DOM elements not found");
@@ -15,18 +16,22 @@ function checkAuth() {
     }
 
     if (user) {
-      // User is signed in
       authContainer.style.display = "none";
       logoutButton.style.display = "block";
       appContent.style.display = "block";
       if (uploadContainer) uploadContainer.style.display = "flex";
+      blurBackground.style.display = "none";
       showStatus(`Welcome ${user.email}!`, "success");
+      document.body.style.backgroundColor = 'white';
+      document.querySelector('.header').style.display = 'block';
     } else {
-      // User is signed out
       authContainer.style.display = "block";
       logoutButton.style.display = "none";
       appContent.style.display = "none";
       if (uploadContainer) uploadContainer.style.display = "none";
+      blurBackground.style.display = "block";
+      document.body.style.backgroundColor = '#f0f0f0';
+      document.querySelector('.header').style.display = 'none';
     }
   });
 }
@@ -571,19 +576,72 @@ function displayFormResult(row) {
 
 document.getElementById("searchInput").addEventListener("input", searchBME);
 
-function handleAuth(e) {
-  if (e) e.preventDefault();
-  
-  const email = document.getElementById('email-input').value.trim();
-  const password = document.getElementById('password-input').value;
-  
-  if (!email || !password) {
+function handleAuth(event) {
+  event.preventDefault();
+  const email = document.getElementById('email-input').value;
+  const password = document.getElementById('password-input');
+  const rememberMe = document.querySelector('.remember-me input[type="checkbox"]').checked;
+
+  if (!email || !password.value) {
     showStatus("Please fill in both email and password fields", "error");
     return;
   }
 
-  login(email, password);
+  showStatus("Signing in...", "info");
+  
+  auth.signInWithEmailAndPassword(email, password.value)
+    .then((userCredential) => {
+      // If remember me is checked, store the auth state
+      if (rememberMe) {
+        localStorage.setItem('rememberMe', 'true');
+        localStorage.setItem('userEmail', email);
+      } else {
+        localStorage.removeItem('rememberMe');
+        localStorage.removeItem('userEmail');
+      }
+      showStatus("Successfully logged in!", "success");
+      document.getElementById('password-input').value = ''; // Clear password for security
+    })
+    .catch((error) => {
+      console.error("Error logging in:", error);
+      let errorMessage;
+      
+      switch (error.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-login-credentials':
+          errorMessage = "Invalid email or password. Please try again.";
+          break;
+        case 'auth/invalid-email':
+          errorMessage = "Please enter a valid email address.";
+          break;
+        case 'auth/user-disabled':
+          errorMessage = "This account has been disabled. Please contact support.";
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = "Too many failed attempts. Please try again later or reset your password.";
+          break;
+        default:
+          errorMessage = "Login failed. Please try again.";
+      }
+      
+      showStatus(errorMessage, "error");
+      document.getElementById('password-input').value = ''; // Clear password on error
+    });
 }
+
+// Add this to check for remembered login on page load
+window.addEventListener('load', () => {
+  const rememberMe = localStorage.getItem('rememberMe');
+  const userEmail = localStorage.getItem('userEmail');
+  
+  if (rememberMe === 'true' && userEmail) {
+    // Auto-fill the email
+    document.getElementById('email-input').value = userEmail;
+    // You might want to focus on password field
+    document.getElementById('password-input').focus();
+  }
+});
 
 // Function to handle clearing the form
 function clearAuthForm() {
