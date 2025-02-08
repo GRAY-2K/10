@@ -1,6 +1,5 @@
 // Initialize Firebase Auth
 const auth = firebase.auth();
-let isSignIn = true;
 
 // Check Authentication Status
 function checkAuth() {
@@ -74,48 +73,6 @@ function login(email, password) {
     });
 }
 
-// Signup Function
-function signupWithEmail(email, password) {
-  if (!email || !password) {
-    showStatus("Please provide both email and password", "error");
-    return;
-  }
-
-  // Add password validation
-  if (password.length < 8 || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-    showStatus("Your password must contain at least 8 characters including 1 special character", "error");
-    return;
-  }
-
-  showStatus("Creating account...", "info");
-  
-  auth.createUserWithEmailAndPassword(email, password)
-    .then(() => {
-      showStatus("Account created successfully!", "success");
-    })
-    .catch((error) => {
-      console.error("Error creating account:", error);
-      let errorMessage = "Signup failed";
-      
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          errorMessage = "This email is already registered. Please login instead.";
-          break;
-        case 'auth/invalid-email':
-          errorMessage = "Please enter a valid email address.";
-          break;
-        case 'auth/weak-password':
-        case 'auth/password-does-not-meet-requirements':
-          errorMessage = "Your password must contain at least 8 characters including 1 special character";
-          break;
-        default:
-          errorMessage = "Signup failed. Please try again.";
-      }
-      
-      showStatus(errorMessage, "error");
-    });
-}
-
 // Password Reset Function
 function resetPassword(email) {
   if (!email) {
@@ -167,35 +124,8 @@ function logout() {
 
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-  // Add tab switching functionality
-  const signinTab = document.getElementById('signin-tab');
-  const signupTab = document.getElementById('signup-tab');
-  const authSubmitButton = document.getElementById('auth-submit-button');
-  const logoutButton = document.getElementById('logout-button');
-
-  if (signinTab && signupTab && authSubmitButton) {
-    signinTab.addEventListener('click', () => {
-      isSignIn = true;
-      signinTab.classList.add('active');
-      signupTab.classList.remove('active');
-      authSubmitButton.textContent = 'Sign In';
-      
-      // Clear error messages and form
-      clearAuthForm();
-    });
-
-    signupTab.addEventListener('click', () => {
-      isSignIn = false;
-      signupTab.classList.add('active');
-      signinTab.classList.remove('active');
-      authSubmitButton.textContent = 'Sign Up';
-      
-      // Clear error messages and form
-      clearAuthForm();
-    });
-  }
-
   // Add logout handler
+  const logoutButton = document.getElementById('logout-button');
   if (logoutButton) {
     logoutButton.addEventListener('click', logout);
   }
@@ -220,37 +150,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Initialize Authentication Check
   checkAuth();
-
-  // Add this after your DOM content loaded event listener
-  document.getElementById('password-input').addEventListener('input', function(e) {
-    const password = e.target.value;
-    const requirements = document.getElementById('password-requirements');
-    const lengthReq = document.getElementById('length-requirement');
-    const specialReq = document.getElementById('special-requirement');
-    
-    // Show requirements when user starts typing
-    if (password.length > 0) {
-      requirements.style.display = 'block';
-    } else {
-      requirements.style.display = 'none';
-    }
-    
-    // Check length requirement
-    if (password.length >= 8) {
-      lengthReq.classList.add('met');
-    } else {
-      lengthReq.classList.remove('met');
-    }
-    
-    // Check special character requirement
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      specialReq.classList.add('met');
-    } else {
-      specialReq.classList.remove('met');
-    }
-  });
 });
 
+// Your Existing Code for Medical Equipment Details
 // Your Existing Code for Medical Equipment Details
 let workbookData = null;
 let historyData = null;
@@ -668,13 +570,6 @@ function displayFormResult(row) {
         updateButtons();
       }, 0);
     }
-  }
-
-  formResult.innerHTML = formHTML;
-  formResult.style.display = "block";
-}
-
-document.getElementById("searchInput").addEventListener("input", searchBME);
 
 function handleAuth(e) {
   if (e) e.preventDefault();
@@ -687,11 +582,7 @@ function handleAuth(e) {
     return;
   }
 
-  if (isSignIn) {
-    login(email, password);
-  } else {
-    signupWithEmail(email, password);
-  }
+  login(email, password);
 }
 
 // Add this new function to handle clearing the form
@@ -705,11 +596,5 @@ function clearAuthForm() {
   if (status) {
     status.style.display = 'none';
     status.textContent = '';
-  }
-  
-  // Hide password requirements
-  const requirements = document.getElementById('password-requirements');
-  if (requirements) {
-    requirements.style.display = 'none';
   }
 }
