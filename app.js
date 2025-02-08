@@ -152,8 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
   checkAuth();
 });
 
-// Your Existing Code for Medical Equipment Details
-// Your Existing Code for Medical Equipment Details
+// Medical Equipment Details Code
 let workbookData = null;
 let historyData = null;
 let headers = [];
@@ -413,8 +412,6 @@ function displayFormResult(row) {
 
   formHTML += "</table></div>";
 
-  let currentPageIndex = 0;
-
   if (historyData && historyData.length > 0) {
     const matchingHistoryRecords = historyData.filter((record) => {
       return (
@@ -570,6 +567,13 @@ function displayFormResult(row) {
         updateButtons();
       }, 0);
     }
+  }
+
+  formResult.innerHTML = formHTML;
+  formResult.style.display = "block";
+}
+
+document.getElementById("searchInput").addEventListener("input", searchBME);
 
 function handleAuth(e) {
   if (e) e.preventDefault();
@@ -585,7 +589,7 @@ function handleAuth(e) {
   login(email, password);
 }
 
-// Add this new function to handle clearing the form
+// Function to handle clearing the form
 function clearAuthForm() {
   // Clear input fields
   document.getElementById('email-input').value = '';
