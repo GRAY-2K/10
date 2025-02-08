@@ -38,7 +38,7 @@ function login(email, password) {
     return;
   }
 
-  showStatus("Logging in...", "info");
+  showStatus("Signing in...", "info");
   
   auth.signInWithEmailAndPassword(email, password)
     .then(() => {
@@ -320,7 +320,7 @@ function showStatus(message, type) {
 }
 
 function searchBME() {
-  const searchTerm = document.getElementById("searchInput").value.trim().toLowerCase();
+  const searchTerm = document.getElementById("searchInput").value.trim();
   const formResult = document.getElementById("formResult");
 
   if (!workbookData) {
@@ -333,18 +333,15 @@ function searchBME() {
     return;
   }
 
-  // Allow partial matches and match against multiple fields
+  // Changed to exact match
   const filteredData = workbookData.filter((row) => {
-    const bmeMatch = row["BME"]?.toString().toLowerCase().includes(searchTerm);
-    const titleMatch = row["TITLE"]?.toString().toLowerCase().includes(searchTerm);
-    const modelMatch = row["MODEL"]?.toString().toLowerCase().includes(searchTerm);
-    return bmeMatch || titleMatch || modelMatch;
+    return row["BME"]?.toString() === searchTerm;
   });
 
   if (filteredData.length > 0) {
     displayFormResult(filteredData[0]);
   } else {
-    formResult.innerHTML = "No matching equipment found";
+    formResult.innerHTML = "NO MATCHING EQUIPMENT FOUND";
     formResult.style.display = "block";
   }
 }
@@ -468,11 +465,11 @@ function displayFormResult(row) {
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
                       <div style="display: flex; gap: 0.5rem;">
                           <button class="nav-btn first-btn" style="padding: 0.5rem; background: var(--primary-color); color: white; border: none; border-radius: 0.25rem; cursor: pointer; width: 40px;">&lt;&lt;</button>
-                          <button class="nav-btn prev-btn" style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 0.25rem; cursor: pointer; width: 100px;">Next</button>
+                          <button class="nav-btn prev-btn" style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 0.25rem; cursor: pointer; width: 120px;">NEXT</button>
                       </div>
                       <span class="page-indicator" style="font-size: 0.875rem;">1/${matchingHistoryRecords.length}</span>
                       <div style="display: flex; gap: 0.5rem;">
-                          <button class="nav-btn next-btn" style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 0.25rem; cursor: pointer; width: 100px;">Previous ></button>
+                          <button class="nav-btn next-btn" style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 0.25rem; cursor: pointer; width: 120px;">PREVIOUS ></button>
                           <button class="nav-btn last-btn" style="padding: 0.5rem; background: var(--primary-color); color: white; border: none; border-radius: 0.25rem; cursor: pointer; width: 40px;">&gt;&gt;</button>
                       </div>
                   </div>
@@ -491,11 +488,10 @@ function displayFormResult(row) {
         let currentPage = 0;
 
         function updateButtons() {
-          const nextBtnText = currentPage === 0 ? "Next" : "< Next";
-          const prevBtnText =
-            currentPage === records.length - 1
-              ? "Previous"
-              : "Previous >";
+          const nextBtnText = currentPage === 0 ? "NEXT" : "< NEXT";
+          const prevBtnText = currentPage === records.length - 1 
+              ? "PREVIOUS" 
+              : "PREVIOUS >";
 
           prevBtn.innerHTML = nextBtnText;
           nextBtn.innerHTML = prevBtnText;
