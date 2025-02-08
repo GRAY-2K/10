@@ -469,13 +469,13 @@ function displayFormResult(row) {
       formHTML += `
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
                       <div style="display: flex; gap: 0.5rem;">
-                          <button class="nav-btn first-btn" style="padding: 0.5rem; background: var(--primary-color); color: white; border: none; border-radius: 0.25rem; cursor: pointer; width: 40px;">&lt;&lt;</button>
-                          <button class="nav-btn prev-btn" style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 0.25rem; cursor: pointer; width: 120px;">NEXT</button>
+                          <button class="nav-btn first-btn" style="padding: 0.5rem; background: var(--primary-color); color: white; border: none; border-radius: 0.5rem; cursor: pointer; width: 40px;">&lt;&lt;</button>
+                          <button class="nav-btn prev-btn" style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 0.5rem; cursor: pointer; width: 120px;">NEXT</button>
                       </div>
                       <span class="page-indicator" style="font-size: 0.875rem;">1/${matchingHistoryRecords.length}</span>
                       <div style="display: flex; gap: 0.5rem;">
-                          <button class="nav-btn next-btn" style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 0.25rem; cursor: pointer; width: 120px;">PREVIOUS ></button>
-                          <button class="nav-btn last-btn" style="padding: 0.5rem; background: var(--primary-color); color: white; border: none; border-radius: 0.25rem; cursor: pointer; width: 40px;">&gt;&gt;</button>
+                          <button class="nav-btn next-btn" style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 0.5rem; cursor: pointer; width: 120px;">PREVIOUS ></button>
+                          <button class="nav-btn last-btn" style="padding: 0.5rem; background: var(--primary-color); color: white; border: none; border-radius: 0.5rem; cursor: pointer; width: 40px;">&gt;&gt;</button>
                       </div>
                   </div>
               </div></div>`;
