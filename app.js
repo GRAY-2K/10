@@ -88,7 +88,7 @@ function resetPassword(email) {
   showStatus("Sending password reset email...", "info");
   
   const actionCodeSettings = {
-    url: 'https://10-bb4.pages.dev',  // Your Cloudflare Pages domain
+    url: 'https://10.s3yd.me/admin.html',  // Update this to your domain
     handleCodeInApp: false
   };
   
