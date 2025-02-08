@@ -16,9 +16,11 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, sans-serif;
-  background-color: #f0f0f0;
+  background: linear-gradient(to bottom, #ffffff, #808080, #000000);
   color: var(--text-color);
   line-height: 0.85;
+  min-height: 100vh;
+  margin: 0;
 }
 
 .container {
@@ -28,13 +30,13 @@ body {
 }
 
 .header {
-  background-color: var(--header-bg);
-  color: white;
+  background-color: transparent;
+  color: black;
   padding: 2rem 0;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   position: relative;
   display: none;
+  text-shadow: none;
 }
 
 .version {
@@ -146,6 +148,8 @@ body {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 0;
+  border-radius: 0 0 0 0;
+  overflow: hidden;
 }
 
 .details-table td {
@@ -174,6 +178,7 @@ body {
   margin: 0;
   text-align: center;
   font-size: 0.875rem;
+  border-radius: 0.5rem 0.5rem 0 0;
 }
 
 .history-container {
@@ -185,8 +190,9 @@ body {
   border-collapse: collapse;
   margin-bottom: 1.5rem;
   border: none;
-  border-radius: 0;
+  border-radius: 0 0 0.5rem 0.5rem;
   background: white;
+  overflow: hidden;
 }
 
 .history-table th,
@@ -240,7 +246,7 @@ body {
   top: 50%;
   transform: translateY(-50%);
   background: none;
-  color: white;
+  color: black;
   padding: 0.5rem 1rem;
   border: none;
   cursor: pointer;
@@ -255,12 +261,10 @@ body {
 
 /* Auth Container Styles */
 #auth-container {
+  min-height: 100vh;
   max-width: 450px;
   margin: 8rem auto;
   padding: 2rem;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -268,7 +272,12 @@ body {
 }
 
 #login-form {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
+  max-width: 400px;
 }
 
 #login-form form {
@@ -347,6 +356,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  z-index: 2;
 }
 
 .blur-background {
@@ -356,9 +367,6 @@ body {
   width: 100%;
   height: 100%;
   z-index: 1;
-  background-color: #f0f0f0;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
 .login-header {
@@ -439,4 +447,9 @@ body {
 
 .forgot-password:hover {
     text-decoration: underline;
+}
+
+/* Add or update this style for the page counter */
+.page-indicator {
+    color: white;
 }
