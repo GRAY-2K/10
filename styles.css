@@ -24,14 +24,14 @@ body {
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0;
 }
 
 .header {
   background-color: var(--header-bg);
   color: white;
   padding: 2rem 0;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   position: relative;
 }
@@ -56,11 +56,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  margin: 0 auto;
-  text-align: center;
-  min-height: calc(100vh - 200px);
   justify-content: center;
+  gap: 0.25rem;
+  margin-top: 2rem;
 }
 
 .custom-file-upload {
@@ -104,8 +102,8 @@ body {
 }
 
 #status {
-  margin: 0 0 1rem 0;
-  padding: 0.75rem;
+  margin: 1rem 0;
+  padding: 1rem;
   border-radius: 0.5rem;
   text-align: center;
   font-weight: 500;
@@ -139,10 +137,8 @@ body {
 }
 
 #formResult {
-  border-radius: 0;
-  box-shadow: none;
+  text-align: center;
   margin-top: 2rem;
-  padding: 0;
 }
 
 .details-table {
@@ -247,7 +243,7 @@ body {
   padding: 0.5rem 1rem;
   border: none;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: bold;
   transition: opacity 0.2s;
 }
 
@@ -258,12 +254,15 @@ body {
 
 /* Auth Container Styles */
 #auth-container {
-  max-width: 400px;
+  max-width: 450px;
   margin: 2rem auto;
   padding: 2rem;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 #login-form {
@@ -329,4 +328,21 @@ body {
 
 .auth-buttons button:active {
   transform: translateY(0);
+}
+
+#searchContainer {
+  display: none;
+  margin-top: 0rem;
+}
+
+#searchContainer > div:first-child {
+  display: flex;
+  justify-content: center;
+  margin-top: 0;
+}
+
+#app-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
