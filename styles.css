@@ -31,7 +31,7 @@ body {
 
 .header {
   background-color: transparent;
-  color: black;
+  color: var(--primary-color);
   padding: 2rem 0;
   margin-bottom: 2rem;
   position: relative;
@@ -246,7 +246,7 @@ body {
   top: 50%;
   transform: translateY(-50%);
   background: none;
-  color: black;
+  color: var(--primary-color);
   padding: 0.5rem 1rem;
   border: none;
   cursor: pointer;
