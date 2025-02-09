@@ -21,6 +21,7 @@ body {
   line-height: 0.85;
   min-height: 100vh;
   margin: 0;
+  overflow: hidden;
 }
 
 .container {
@@ -262,12 +263,13 @@ body {
 /* Auth Container Styles */
 #auth-container {
   min-height: 100vh;
-  max-width: 450px;
-  margin: 8rem auto;
+  max-width: 500px;
+  margin: 0 auto;
   padding: 2rem;
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  top: 65%;
+  transform: translate(-50%, -50%);
   z-index: 2;
 }
 
@@ -277,7 +279,7 @@ body {
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
 }
 
 #login-form form {
